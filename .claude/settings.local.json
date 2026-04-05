@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm info:*)",
+      "Bash(npm install:*)",
+      "WebSearch",
+      "WebFetch(domain:www.nativewind.dev)",
+      "WebFetch(domain:docs.expo.dev)",
+      "WebFetch(domain:docs.swmansion.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:expo.dev)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:mmazzarolo.com)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}
