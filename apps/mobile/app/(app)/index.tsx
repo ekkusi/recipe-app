@@ -1,7 +1,8 @@
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery } from '@tanstack/react-query';
 import type { Recipe } from '@recipe-app/shared';
-import { FlatList, Text, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { Text, View } from 'react-native';
 
 import { apiFetch } from '../../lib/api';
 
@@ -35,10 +36,11 @@ export default function RecipesScreen() {
         <Text className="text-2xl font-bold text-foreground">Recipes</Text>
       </View>
 
-      <FlatList
+      <FlashList
         data={recipes}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="px-4 gap-3 pb-8"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+        ItemSeparatorComponent={() => <View className="h-3" />}
         ListEmptyComponent={
           <Text className="text-center text-muted-foreground mt-8">No recipes yet</Text>
         }
