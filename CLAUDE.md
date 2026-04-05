@@ -2,57 +2,70 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Monorepo structure
 
-```bash
-npm run dev      # Start dev server (http://localhost:3000)
-npm run build    # Production build
-npm run start    # Start production server
-```
+NX monorepo with npm workspaces:
+- `apps/web/` — Next.js web app + REST API (desktop-focused, but should remain usable on mobile)
+- `apps/mobile/` — Expo/React Native mobile app (primary mobile experience)
+- `libs/shared/` — shared TypeScript types and utilities (`@recipe-app/shared`)
+
+**Always prefer `@recipe-app/shared` for types and utilities used by more than one app.** When adding new shared types or constants, add them to `libs/shared/src/` and import from `@recipe-app/shared`.
 
 ## Stack
 
-- **Next.js 16** (App Router, `src/` dir, TypeScript, Turbopack)
-- **ShadCN UI v4** + **Tailwind CSS v4** — components in `src/components/ui/` — uses `@base-ui/react` (not Radix), no `asChild` prop; use `render={<Link />}` for polymorphic buttons
-- **Clerk** — authentication (env: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`)
-- **Supabase** — PostgreSQL database via service role key (no Supabase auth, Clerk handles auth)
-- **next-pwa** — PWA manifest at `public/manifest.json`, disabled in development
+- **Next.js 16** (App Router, `src/` dir, TypeScript, Turbopack) — `apps/web/`
+- **Expo SDK 55** + **Expo Router** (file-based nav) — `apps/mobile/`
+- **Tailwind CSS v4** (web) / **NativeWind v4** (mobile) — keep design tokens in sync between apps
+- **ShadCN UI v4** (web) — components in `apps/web/src/components/ui/`; uses `@base-ui/react` (not Radix), no `asChild` prop; use `render={<Link />}` for polymorphic buttons
+- **Clerk** — auth for both apps (`@clerk/nextjs` on web, `@clerk/clerk-expo` on mobile)
+- **Supabase** — PostgreSQL via service role key (no Supabase auth); `user_id` = Clerk `userId` stored as `text`
+- **TanStack Query v5** — data fetching on mobile against web's `/api/*` routes
+- **next-pwa** — PWA manifest at `apps/web/public/manifest.json`, disabled in development
 
-## Architecture
+## Design system
+
+Both apps share a pastel theme — keep styling consistent across platforms:
+- **Background**: cream (`#faf7f0` / `bg-background`)
+- **Primary**: dusty rose (`#c27070`)
+- **Secondary**: sage (`#d9eadc`)
+- **Accent**: lavender (`#d5cee6`)
+- **Font**: Nunito (rounded)
+- **Radius**: rounder than defaults — use `rounded-2xl` / `rounded-3xl` for cards and buttons
+
+Web: theme defined as CSS variables in `apps/web/src/app/globals.css`.
+Mobile: color tokens in `apps/mobile/tailwind.config.js`.
+
+## Web architecture (`apps/web/`)
 
 ### Route groups
-- `src/app/(app)/` — authenticated app shell with bottom nav + `max-w-lg` centered layout
+- `src/app/(app)/` — authenticated shell with bottom nav + `max-w-lg` centered layout
 - `src/app/(auth)/` — Clerk sign-in/sign-up pages
-- `src/app/api/` — REST API routes used by client components
+- `src/app/api/` — REST API consumed by mobile (and web client components)
 
 ### Auth pattern
-Clerk proxy in `src/proxy.ts` (Next.js 16 renamed `middleware.ts` → `proxy.ts`) protects all routes except `/`, `/sign-in`, `/sign-up`. Server-side pages use `auth()` from `@clerk/nextjs/server`. Client pages hit `/api/*` routes which also call `auth()`.
+Clerk proxy in `src/proxy.ts` (Next.js 16 renamed `middleware.ts` → `proxy.ts`) protects all routes. Server pages use `auth()` from `@clerk/nextjs/server`. API routes also call `auth()`.
 
 ### Database pattern
-All DB access goes through **service role key** (bypasses RLS) in server-only code (`src/lib/db/`). The `user_id` is the Clerk `userId` string, stored as `text` in all tables. Never call Supabase from client components directly.
+All DB access goes through **service role key** in server-only code (`src/lib/db/`). Never call Supabase from client components directly.
 
-### Key files
-- `src/lib/db/recipes.ts` — all recipe CRUD + tag queries
-- `src/lib/db/shopping-list.ts` — shopping list CRUD
-- `src/lib/supabase/server.ts` — `createClient()` (cookie-based) and `createServiceClient()` (service role)
-- `src/lib/units.ts` — `UNITS` constant used by ingredient forms
-- `src/components/recipes/ingredient-row.tsx` — reusable ingredient input (name + qty + unit)
-- `src/components/recipes/recipe-form.tsx` — full recipe create/edit form (client component)
+## Mobile architecture (`apps/mobile/`)
+
+- Expo Router file-based routing mirroring web's route groups: `(app)/` (auth-gated tabs), `(auth)/`
+- `lib/api.ts` — generic fetch wrapper hitting web's API; uses `EXPO_PUBLIC_API_BASE_URL`
+- `lib/query-client.ts` — TanStack Query client config
+- Auth guard in `app/_layout.tsx` redirects based on `useAuth().isSignedIn`
+
 
 ## Database schema
 
-Run `supabase/schema.sql` in the Supabase SQL editor to set up tables and seed tags.
-
+Run `apps/web/supabase/schema.sql` in the Supabase SQL editor.
 Tables: `recipes`, `recipe_ingredients`, `recipe_instructions`, `tags`, `recipe_tags`, `shopping_list_items`
 
 ## Environment variables
 
-Copy `.env.local.example` to `.env.local` and fill in Clerk and Supabase keys.
+- `apps/web/.env.local` — Clerk + Supabase keys (copy from `.env.local.example`)
+- `apps/mobile/.env.local` — `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`, `EXPO_PUBLIC_API_BASE_URL`
 
-## Design system
+## Other notable things
 
-Pastel theme defined in `src/app/globals.css` CSS variables — cream background, dusty rose primary, sage secondary, lavender accent. Font: Nunito (rounded). Border radius base: `0.875rem` (rounder than ShadCN default). Use `rounded-2xl` / `rounded-3xl` for cards and buttons.
-
-## PWA icons
-
-Generate `public/icon-192.png` and `public/icon-512.png` to complete PWA installability (currently missing).
+- When installing packages to the mobile app, always use `npx expo install`
