@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { RecipeForm, RecipeFormValues } from "@/components/recipes/recipe-form";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ type Tag = { id: string; name: string };
 
 export default function NewRecipePage() {
   const router = useRouter();
+  const t = useTranslations('recipes');
   const [tags, setTags] = useState<Tag[]>([]);
 
   useEffect(() => {
@@ -28,8 +30,8 @@ export default function NewRecipePage() {
 
   return (
     <>
-      <Header title="New Recipe" />
-      <RecipeForm tags={tags} onSubmit={handleSubmit} submitLabel="Create Recipe" />
+      <Header title={t('newRecipe')} />
+      <RecipeForm tags={tags} onSubmit={handleSubmit} submitLabel={t('createRecipe')} />
     </>
   );
 }

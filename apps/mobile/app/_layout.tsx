@@ -1,4 +1,5 @@
 import '../global.css';
+import '../i18n';
 
 import { ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';

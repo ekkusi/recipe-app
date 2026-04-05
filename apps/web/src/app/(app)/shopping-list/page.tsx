@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +25,7 @@ type Item = {
 };
 
 export default function ShoppingListPage() {
+  const t = useTranslations('shopping');
   const [items, setItems] = useState<Item[]>([]);
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -86,7 +88,7 @@ export default function ShoppingListPage() {
 
   return (
     <>
-      <Header title="Shopping List" />
+      <Header title={t('title')} />
 
       <div className="py-4 flex flex-col gap-4">
         {/* Add item form */}
@@ -96,7 +98,7 @@ export default function ShoppingListPage() {
         >
           <div className="flex gap-2">
             <Input
-              placeholder="Add an item..."
+              placeholder={t('addPlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="flex-1 rounded-xl"
@@ -113,7 +115,7 @@ export default function ShoppingListPage() {
           <div className="flex gap-2">
             <Input
               type="number"
-              placeholder="Qty"
+              placeholder={t('qtyPlaceholder')}
               min="0"
               step="any"
               value={quantity}
@@ -125,10 +127,10 @@ export default function ShoppingListPage() {
               onValueChange={(v) => setUnit(!v || v === "__none__" ? "" : v)}
             >
               <SelectTrigger className="flex-1 rounded-xl">
-                <SelectValue placeholder="Unit (optional)" />
+                <SelectValue placeholder={t('unitOptional')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">No unit</SelectItem>
+                <SelectItem value="__none__">{t('noUnit')}</SelectItem>
                 {UNITS.map((u) => (
                   <SelectItem key={u.value} value={u.value}>
                     {u.label}
@@ -158,14 +160,14 @@ export default function ShoppingListPage() {
           <div>
             <div className="flex items-center justify-between mb-2 px-1">
               <p className="text-sm font-semibold text-muted-foreground">
-                Done ({checked.length})
+                {t('done', { count: checked.length })}
               </p>
               <button
                 type="button"
                 onClick={handleClearChecked}
                 className="text-xs text-muted-foreground hover:text-destructive underline"
               >
-                Clear all
+                {t('clearAll')}
               </button>
             </div>
             <div className="bg-white rounded-3xl border border-border divide-y divide-border overflow-hidden opacity-70">
@@ -184,8 +186,8 @@ export default function ShoppingListPage() {
         {items.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-4xl mb-3">🛒</p>
-            <p className="font-semibold">Your list is empty</p>
-            <p className="text-sm mt-1">Add items above or from a recipe</p>
+            <p className="font-semibold">{t('empty.title')}</p>
+            <p className="text-sm mt-1">{t('empty.subtitle')}</p>
           </div>
         )}
       </div>

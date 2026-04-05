@@ -1,0 +1,94 @@
+{
+  "common": {
+    "loading": "Ladataan…",
+    "error": "Tapahtui virhe",
+    "cancel": "Peruuta",
+    "save": "Tallenna",
+    "edit": "Muokkaa",
+    "back": "← Takaisin",
+    "saving": "Tallennetaan…",
+    "notFound": "Ei löydy"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Tervetuloa takaisin",
+      "email": "Sähköposti",
+      "password": "Salasana",
+      "submit": "Kirjaudu sisään",
+      "noAccount": "Ei tiliä? ",
+      "signUpLink": "Rekisteröidy"
+    },
+    "signUp": {
+      "title": "Luo tili",
+      "submit": "Rekisteröidy",
+      "hasAccount": "Onko sinulla jo tili? ",
+      "signInLink": "Kirjaudu sisään"
+    },
+    "verify": {
+      "title": "Vahvista sähköposti",
+      "instruction": "Anna sähköpostiisi {{email}} lähetetty koodi",
+      "code": "Vahvistuskoodi",
+      "submit": "Vahvista",
+      "resend": "Lähetä uudelleen",
+      "codeRequired": "Koodi on pakollinen"
+    },
+    "mfa": {
+      "title": "Vahvista henkilöllisyytesi",
+      "instruction": "Anna sähköpostiisi lähetetty koodi"
+    }
+  },
+  "recipes": {
+    "title": "Reseptit",
+    "new": "+ Uusi",
+    "newRecipe": "Uusi resepti",
+    "editRecipe": "Muokkaa reseptiä",
+    "createRecipe": "Luo resepti",
+    "saveChanges": "Tallenna muutokset",
+    "saveRecipe": "Tallenna resepti",
+    "notFound": "Reseptiä ei löydy",
+    "loadError": "Reseptien lataaminen epäonnistui",
+    "loadOneError": "Reseptin lataaminen epäonnistui",
+    "ingredients": "Ainesosat",
+    "instructions": "Ohjeet",
+    "addToShopping": "+ Ostoslistalle",
+    "adding": "Lisätään…",
+    "timeMinutes": "{{time}} min",
+    "empty_title": "Ei reseptejä vielä",
+    "empty_subtitle": "Lisää ensimmäinen resepti aloittaaksesi",
+    "difficulty_easy": "Helppo",
+    "difficulty_medium": "Keskivaikea",
+    "difficulty_hard": "Vaikea",
+    "form_name": "Reseptin nimi *",
+    "form_namePlaceholder": "esim. Kermainen tomaattikeitto",
+    "form_description": "Kuvaus",
+    "form_descriptionPlaceholder": "Lyhyt kuvaus reseptistä...",
+    "form_difficulty": "Vaikeustaso",
+    "form_time": "Aika (min)",
+    "form_tags": "Tagit",
+    "form_ingredients": "Ainesosat *",
+    "form_ingredient": "Ainesosa",
+    "form_qty": "Määrä",
+    "form_addIngredient": "+ Lisää ainesosa",
+    "form_stepPlaceholder": "Vaihe {{step}}…",
+    "form_addStep": "+ Lisää vaihe"
+  },
+  "shopping": {
+    "title": "Ostoslista",
+    "addPlaceholder": "Lisää tuote…",
+    "qtyPlaceholder": "Määrä (valinnainen)",
+    "done": "Valmis ({{count}})",
+    "clearAll": "Tyhjennä kaikki",
+    "loadError": "Listan lataaminen epäonnistui",
+    "empty_title": "Lista on tyhjä",
+    "empty_subtitle": "Lisää tuotteita ylhäältä tai reseptistä"
+  },
+  "units": {
+    "selectTitle": "Valitse yksikkö",
+    "none": "— Ei yksikköä",
+    "placeholder": "Yksikkö"
+  },
+  "nav": {
+    "recipes": "Reseptit",
+    "shopping": "Ostoslista"
+  }
+}

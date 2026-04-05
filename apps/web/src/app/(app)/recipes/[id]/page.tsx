@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { Pencil, Clock, ChefHat, ShoppingCart } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +17,7 @@ export default async function RecipePage({
 }) {
   const { id } = await params;
   const { userId } = await auth();
+  const t = await getTranslations('recipes');
 
   let recipe;
   try {
@@ -59,13 +61,13 @@ export default async function RecipePage({
           {recipe.difficulty && (
             <Badge variant="outline" className="rounded-full capitalize">
               <ChefHat size={12} className="mr-1" />
-              {recipe.difficulty}
+              {t(`difficulty.${recipe.difficulty}`)}
             </Badge>
           )}
           {recipe.time_minutes && (
             <Badge variant="outline" className="rounded-full">
               <Clock size={12} className="mr-1" />
-              {recipe.time_minutes} min
+              {t('timeMinutes', { time: recipe.time_minutes })}
             </Badge>
           )}
           {tags.map((tag: { id: string; name: string }) => (
@@ -86,7 +88,7 @@ export default async function RecipePage({
         {ingredients.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold">Ingredients</h2>
+              <h2 className="text-lg font-bold">{t('ingredients')}</h2>
               <AddToShoppingListButton ingredients={ingredients} />
             </div>
             <div className="bg-white rounded-3xl border border-border divide-y divide-border overflow-hidden">
@@ -110,7 +112,7 @@ export default async function RecipePage({
         {/* Instructions */}
         {instructions.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold mb-3">Instructions</h2>
+            <h2 className="text-lg font-bold mb-3">{t('instructions')}</h2>
             <div className="flex flex-col gap-3">
               {instructions.map((ins) => (
                 <div key={ins.id} className="flex gap-4">

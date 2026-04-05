@@ -1,20 +1,20 @@
 import { z } from 'zod';
 
 export const ingredientRowSchema = z.object({
-  name: z.string().min(1, 'Ingredient name is required'),
+  name: z.string().min(1, 'Kenttä on pakollinen'),
   quantity: z.string(),
   unit: z.string(),
 });
 
 export const recipeFormSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'Kenttä on pakollinen'),
   description: z.string(),
   difficulty: z.enum(['easy', 'medium', 'hard']).nullable().optional(),
   time_minutes: z.string(),
-  ingredients: z.array(ingredientRowSchema).min(1, 'Add at least one ingredient'),
+  ingredients: z.array(ingredientRowSchema).min(1, 'Lisää vähintään 1 ainesosa'),
   instructions: z.array(
-    z.object({ content: z.string().min(1, 'Step content is required') })
-  ).min(1, 'Add at least one step'),
+    z.object({ content: z.string().min(1, 'Kenttä on pakollinen') })
+  ).min(1, 'Lisää vähintään 1 vaihe'),
   tag_ids: z.array(z.string()),
 });
 

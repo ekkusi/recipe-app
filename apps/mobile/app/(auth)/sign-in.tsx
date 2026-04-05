@@ -3,6 +3,7 @@ import { type Href, Link, useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInSchema, type SignInSchema } from '@recipe-app/shared';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native';
 
 import { Button } from '../../components/ui/Button';
@@ -10,6 +11,7 @@ import { Button } from '../../components/ui/Button';
 export default function SignInScreen() {
   const { signIn, errors: clerkErrors, fetchStatus } = useSignIn();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const { control, handleSubmit, getValues, formState: { errors } } = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
@@ -63,7 +65,7 @@ export default function SignInScreen() {
       className="flex-1 bg-background"
     >
       <View className="flex-1 justify-center px-6 gap-4">
-        <Text className="text-3xl font-bold text-foreground">Welcome back</Text>
+        <Text className="text-3xl font-bold text-foreground">{t('auth.signIn.title')}</Text>
 
         <Controller
           control={control}
@@ -71,7 +73,7 @@ export default function SignInScreen() {
           render={({ field: { value, onChange, onBlur } }) => (
             <TextInput
               className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
-              placeholder="Email"
+              placeholder={t('auth.signIn.email')}
               placeholderTextColor="#8a7a68"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -91,7 +93,7 @@ export default function SignInScreen() {
           render={({ field: { value, onChange, onBlur } }) => (
             <TextInput
               className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
-              placeholder="Password"
+              placeholder={t('auth.signIn.password')}
               placeholderTextColor="#8a7a68"
               secureTextEntry
               value={value}
@@ -108,13 +110,13 @@ export default function SignInScreen() {
         )}
 
         <Button
-          label="Sign in"
+          label={t('auth.signIn.submit')}
           onPress={handleSubmit(handleSignIn)}
           disabled={fetchStatus === 'fetching'}
         />
 
         <Link href="/(auth)/sign-up" className="text-center text-muted-foreground">
-          Don't have an account? <Text className="text-primary">Sign up</Text>
+          {t('auth.signIn.noAccount')}<Text className="text-primary">{t('auth.signIn.signUpLink')}</Text>
         </Link>
       </View>
     </KeyboardAvoidingView>
@@ -134,6 +136,7 @@ function MfaScreen({
   onVerify: (code: string) => Promise<void>;
   onResend: () => void;
 }) {
+  const { t } = useTranslation();
   const { control, handleSubmit, formState: { errors } } = useForm<{ code: string }>({
     defaultValues: { code: '' },
   });
@@ -144,17 +147,17 @@ function MfaScreen({
       className="flex-1 bg-background"
     >
       <View className="flex-1 justify-center px-6 gap-4">
-        <Text className="text-3xl font-bold text-foreground">Verify your account</Text>
-        <Text className="text-muted-foreground">Enter the code sent to {email}</Text>
+        <Text className="text-3xl font-bold text-foreground">{t('auth.mfa.title')}</Text>
+        <Text className="text-muted-foreground">{t('auth.mfa.instruction')}</Text>
 
         <Controller
           control={control}
           name="code"
-          rules={{ required: 'Code is required' }}
+          rules={{ required: t('auth.verify.codeRequired') }}
           render={({ field: { value, onChange, onBlur } }) => (
             <TextInput
               className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
-              placeholder="Verification code"
+              placeholder={t('auth.verify.code')}
               placeholderTextColor="#8a7a68"
               keyboardType="number-pad"
               value={value}
@@ -170,12 +173,12 @@ function MfaScreen({
         )}
 
         <Button
-          label="Verify"
+          label={t('auth.verify.submit')}
           onPress={handleSubmit(({ code }) => onVerify(code))}
           disabled={fetchStatus === 'fetching'}
         />
         <Button
-          label="Resend code"
+          label={t('auth.verify.resend')}
           onPress={onResend}
           disabled={fetchStatus === 'fetching'}
         />

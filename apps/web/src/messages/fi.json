@@ -1,0 +1,81 @@
+{
+  "common": {
+    "loading": "Ladataan…",
+    "error": "Tapahtui virhe",
+    "cancel": "Peruuta",
+    "save": "Tallenna",
+    "edit": "Muokkaa",
+    "back": "← Takaisin",
+    "saving": "Tallennetaan…",
+    "notFound": "Ei löydy"
+  },
+  "home": {
+    "greeting": "Hyvää päivää,",
+    "greetingUser": "Hei {name} \uD83D\uDC4B",
+    "browseCollection": "Selaa kokoelmaasi",
+    "manageList": "Hallinnoi listaasi",
+    "addRecipe": "Lisää resepti"
+  },
+  "recipes": {
+    "title": "Reseptit",
+    "new": "Uusi",
+    "newRecipe": "Uusi resepti",
+    "editRecipe": "Muokkaa reseptiä",
+    "createRecipe": "Luo resepti",
+    "saveChanges": "Tallenna muutokset",
+    "saveRecipe": "Tallenna resepti",
+    "notFound": "Reseptiä ei löydy",
+    "loadError": "Reseptien lataaminen epäonnistui",
+    "loadOneError": "Reseptin lataaminen epäonnistui",
+    "ingredients": "Ainesosat",
+    "instructions": "Ohjeet",
+    "addToShopping": "Ostoslistalle",
+    "adding": "Lisätään…",
+    "added": "Lisätty!",
+    "addToList": "Lisää listalle",
+    "timeMinutes": "{time} min",
+    "empty": {
+      "title": "Ei reseptejä vielä",
+      "subtitle": "Lisää ensimmäinen resepti aloittaaksesi"
+    },
+    "difficulty": {
+      "label": "Vaikeustaso",
+      "easy": "Helppo",
+      "medium": "Keskivaikea",
+      "hard": "Vaikea"
+    },
+    "form": {
+      "name": "Reseptin nimi *",
+      "namePlaceholder": "esim. Kermainen tomaattikeitto",
+      "description": "Kuvaus",
+      "descriptionPlaceholder": "Lyhyt kuvaus reseptistä...",
+      "time": "Aika (min)",
+      "tags": "Tagit",
+      "ingredients": "Ainesosat *",
+      "ingredient": "Ainesosa",
+      "qty": "Määrä",
+      "addIngredient": "Lisää ainesosa",
+      "stepPlaceholder": "Vaihe {step}…",
+      "addStep": "Lisää vaihe"
+    }
+  },
+  "shopping": {
+    "title": "Ostoslista",
+    "addPlaceholder": "Lisää tuote…",
+    "qtyPlaceholder": "Määrä (valinnainen)",
+    "unitOptional": "Yksikkö (valinnainen)",
+    "noUnit": "Ei yksikköä",
+    "done": "Valmis ({count})",
+    "clearAll": "Tyhjennä kaikki",
+    "loadError": "Listan lataaminen epäonnistui",
+    "empty": {
+      "title": "Lista on tyhjä",
+      "subtitle": "Lisää tuotteita ylhäältä tai reseptistä"
+    }
+  },
+  "nav": {
+    "home": "Koti",
+    "recipes": "Reseptit",
+    "shopping": "Ostoslista"
+  }
+}

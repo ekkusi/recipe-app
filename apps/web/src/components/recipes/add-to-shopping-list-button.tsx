@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShoppingCart, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 type Ingredient = {
@@ -15,6 +16,7 @@ export function AddToShoppingListButton({
 }: {
   ingredients: Ingredient[];
 }) {
+  const t = useTranslations('recipes');
   const [state, setState] = useState<"idle" | "loading" | "done">("idle");
 
   async function handleAdd() {
@@ -43,12 +45,12 @@ export function AddToShoppingListButton({
       {state === "done" ? (
         <>
           <Check size={14} className="text-green-600" />
-          Added!
+          {t('added')}
         </>
       ) : (
         <>
           <ShoppingCart size={14} />
-          {state === "loading" ? "Adding..." : "Add to list"}
+          {state === "loading" ? t('adding') : t('addToList')}
         </>
       )}
     </Button>

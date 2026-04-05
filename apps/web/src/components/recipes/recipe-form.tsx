@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { recipeFormSchema, type RecipeFormSchema } from "@recipe-app/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,9 +37,12 @@ export function RecipeForm({
   initialValues,
   tags,
   onSubmit,
-  submitLabel = "Save Recipe",
+  submitLabel,
 }: RecipeFormProps) {
   const router = useRouter();
+  const t = useTranslations('recipes');
+  const tCommon = useTranslations('common');
+  const resolvedSubmitLabel = submitLabel ?? t('saveRecipe');
 
   const {
     control,
@@ -89,10 +93,10 @@ export function RecipeForm({
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 py-4">
       {/* Title */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="title">Recipe Name *</Label>
+        <Label htmlFor="title">{t('form.name')}</Label>
         <Input
           id="title"
-          placeholder="e.g. Creamy Tomato Pasta"
+          placeholder={t('form.namePlaceholder')}
           {...register("title")}
           className="rounded-xl"
         />
@@ -103,10 +107,10 @@ export function RecipeForm({
 
       {/* Description */}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t('form.description')}</Label>
         <Textarea
           id="description"
-          placeholder="A brief description of the recipe..."
+          placeholder={t('form.descriptionPlaceholder')}
           {...register("description")}
           className="rounded-xl resize-none"
           rows={3}
@@ -116,7 +120,7 @@ export function RecipeForm({
       {/* Difficulty + Time */}
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
-          <Label>Difficulty</Label>
+          <Label>{t('difficulty.label')}</Label>
           <Controller
             control={control}
             name="difficulty"
@@ -128,25 +132,25 @@ export function RecipeForm({
                 }
               >
                 <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Select..." />
+                  <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">—</SelectItem>
-                  <SelectItem value="easy">Easy</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="hard">Hard</SelectItem>
+                  <SelectItem value="easy">{t('difficulty.easy')}</SelectItem>
+                  <SelectItem value="medium">{t('difficulty.medium')}</SelectItem>
+                  <SelectItem value="hard">{t('difficulty.hard')}</SelectItem>
                 </SelectContent>
               </Select>
             )}
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="time">Time (minutes)</Label>
+          <Label htmlFor="time">{t('form.time')}</Label>
           <Input
             id="time"
             type="number"
             min="0"
-            placeholder="e.g. 30"
+            placeholder="30"
             {...register("time_minutes")}
             className="rounded-xl"
           />
@@ -155,7 +159,7 @@ export function RecipeForm({
 
       {/* Tags */}
       <div className="flex flex-col gap-2">
-        <Label>Tags</Label>
+        <Label>{t('form.tags')}</Label>
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => {
             const selected = tag_ids.includes(tag.id);
@@ -180,7 +184,7 @@ export function RecipeForm({
 
       {/* Ingredients */}
       <div className="flex flex-col gap-3">
-        <Label>Ingredients</Label>
+        <Label>{t('form.ingredients')}</Label>
         <div className="flex flex-col gap-2">
           {ingredientFields.map((field, i) => (
             <Controller
@@ -208,13 +212,13 @@ export function RecipeForm({
           onClick={() => appendIngredient(emptyIngredient())}
         >
           <Plus size={14} />
-          Add Ingredient
+          {t('form.addIngredient')}
         </Button>
       </div>
 
       {/* Instructions */}
       <div className="flex flex-col gap-3">
-        <Label>Instructions</Label>
+        <Label>{t('instructions')}</Label>
         <div className="flex flex-col gap-2">
           {instructionFields.map((field, i) => (
             <div key={field.id} className="flex items-start gap-2">
@@ -222,7 +226,7 @@ export function RecipeForm({
                 {i + 1}.
               </span>
               <Textarea
-                placeholder={`Step ${i + 1}...`}
+                placeholder={t('form.stepPlaceholder', { step: i + 1 })}
                 {...register(`instructions.${i}.content`)}
                 className="flex-1 rounded-xl resize-none"
                 rows={2}
@@ -250,7 +254,7 @@ export function RecipeForm({
           onClick={() => appendInstruction({ content: "" })}
         >
           <Plus size={14} />
-          Add Step
+          {t('form.addStep')}
         </Button>
       </div>
 
@@ -262,14 +266,14 @@ export function RecipeForm({
           className="flex-1 rounded-2xl h-12"
           onClick={() => router.back()}
         >
-          Cancel
+          {tCommon('cancel')}
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting}
           className="flex-1 rounded-2xl h-12 font-semibold"
         >
-          {isSubmitting ? "Saving..." : submitLabel}
+          {isSubmitting ? tCommon('saving') : resolvedSubmitLabel}
         </Button>
       </div>
     </form>

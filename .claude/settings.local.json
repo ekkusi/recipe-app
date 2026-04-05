@@ -16,7 +16,8 @@
       "Bash(npx expo:*)",
       "Bash(npm uninstall:*)",
       "WebFetch(domain:clerk.com)",
-      "Bash(ls /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/mobile/app/\\\\\\(auth\\\\\\)/)"
+      "Bash(ls /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/mobile/app/\\\\\\(auth\\\\\\)/)",
+      "Bash(ls:*)"
     ]
   }
 }

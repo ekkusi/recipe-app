@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { RecipeForm, RecipeFormValues } from "@/components/recipes/recipe-form";
 
@@ -10,6 +11,8 @@ type Tag = { id: string; name: string };
 export default function EditRecipePage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const t = useTranslations('recipes');
+  const tCommon = useTranslations('common');
   const [tags, setTags] = useState<Tag[]>([]);
   const [initialValues, setInitialValues] = useState<Partial<RecipeFormValues>>();
 
@@ -54,20 +57,20 @@ export default function EditRecipePage() {
   if (!initialValues) {
     return (
       <>
-        <Header title="Edit Recipe" />
-        <div className="py-16 text-center text-muted-foreground">Loading...</div>
+        <Header title={t('editRecipe')} />
+        <div className="py-16 text-center text-muted-foreground">{tCommon('loading')}</div>
       </>
     );
   }
 
   return (
     <>
-      <Header title="Edit Recipe" />
+      <Header title={t('editRecipe')} />
       <RecipeForm
         tags={tags}
         initialValues={initialValues}
         onSubmit={handleSubmit}
-        submitLabel="Update Recipe"
+        submitLabel={t('saveChanges')}
       />
     </>
   );

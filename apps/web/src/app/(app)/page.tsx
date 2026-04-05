@@ -1,17 +1,22 @@
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { BookOpen, ShoppingCart, Plus } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 
 export default async function HomePage() {
   const user = await currentUser();
-  const firstName = user?.firstName ?? "there";
+  const firstName = user?.firstName ?? "";
+  const t = await getTranslations('home');
+  const tNav = await getTranslations('nav');
 
   return (
     <div className="pt-8 pb-4">
       <div className="mb-8">
-        <p className="text-muted-foreground text-sm font-medium">Good day,</p>
-        <h1 className="text-3xl font-bold mt-0.5">Hey {firstName} 👋</h1>
+        <p className="text-muted-foreground text-sm font-medium">{t('greeting')}</p>
+        <h1 className="text-3xl font-bold mt-0.5">
+          {firstName ? t('greetingUser', { name: firstName }) : t('greeting')}
+        </h1>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -21,8 +26,8 @@ export default async function HomePage() {
               <BookOpen size={20} className="text-primary" />
             </div>
             <div>
-              <p className="font-bold text-foreground">Recipes</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Browse your collection</p>
+              <p className="font-bold text-foreground">{tNav('recipes')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('browseCollection')}</p>
             </div>
           </div>
         </Link>
@@ -33,8 +38,8 @@ export default async function HomePage() {
               <ShoppingCart size={20} className="text-secondary-foreground" />
             </div>
             <div>
-              <p className="font-bold text-foreground">Shopping</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Manage your list</p>
+              <p className="font-bold text-foreground">{tNav('shopping')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('manageList')}</p>
             </div>
           </div>
         </Link>
@@ -47,7 +52,7 @@ export default async function HomePage() {
           className="w-full rounded-2xl h-12 font-semibold"
         >
           <Plus size={18} />
-          Add a Recipe
+          {t('addRecipe')}
         </Button>
       </div>
     </div>

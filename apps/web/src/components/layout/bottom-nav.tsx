@@ -3,16 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, ShoppingCart, Home } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/recipes", label: "Recipes", icon: BookOpen },
-  { href: "/shopping-list", label: "Shopping", icon: ShoppingCart },
-];
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
+
+  const navItems = [
+    { href: "/", label: t('home'), icon: Home },
+    { href: "/recipes", label: t('recipes'), icon: BookOpen },
+    { href: "/shopping-list", label: t('shopping'), icon: ShoppingCart },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-border">
