@@ -22,7 +22,7 @@ export default function EditRecipePage() {
       setInitialValues({
         title: recipe.title,
         description: recipe.description ?? "",
-        difficulty: recipe.difficulty ?? "",
+        difficulty: recipe.difficulty ?? null,
         time_minutes: recipe.time_minutes?.toString() ?? "",
         ingredients: (recipe.recipe_ingredients ?? [])
           .sort((a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order)
@@ -33,7 +33,7 @@ export default function EditRecipePage() {
           })),
         instructions: (recipe.recipe_instructions ?? [])
           .sort((a: { step_number: number }, b: { step_number: number }) => a.step_number - b.step_number)
-          .map((ins: { content: string }) => ins.content),
+          .map((ins: { content: string }) => ({ content: ins.content })),
         tag_ids: (recipe.recipe_tags ?? []).map(
           (rt: { tag_id: string }) => rt.tag_id
         ),

@@ -69,3 +69,4 @@ Tables: `recipes`, `recipe_ingredients`, `recipe_instructions`, `tags`, `recipe_
 ## Other notable things
 
 - When installing packages to the mobile app, always use `npx expo install`
+- Never install any packages to the root

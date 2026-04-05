@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { recipeFormSchema, type RecipeFormSchema } from "@recipe-app/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,33 +17,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { IngredientRow, IngredientRowValue } from "./ingredient-row";
+import { IngredientRow } from "./ingredient-row";
+
+export type { RecipeFormSchema as RecipeFormValues };
 
 type Tag = { id: string; name: string };
-type Difficulty = "easy" | "medium" | "hard";
-
-export type RecipeFormValues = {
-  title: string;
-  description: string;
-  difficulty: Difficulty | "";
-  time_minutes: string;
-  ingredients: IngredientRowValue[];
-  instructions: string[];
-  tag_ids: string[];
-};
 
 interface RecipeFormProps {
-  initialValues?: Partial<RecipeFormValues>;
+  initialValues?: Partial<RecipeFormSchema>;
   tags: Tag[];
-  onSubmit: (values: RecipeFormValues) => Promise<void>;
+  onSubmit: (values: RecipeFormSchema) => Promise<void>;
   submitLabel?: string;
 }
 
-const emptyIngredient = (): IngredientRowValue => ({
-  name: "",
-  quantity: "",
-  unit: "",
-});
+const emptyIngredient = () => ({ name: "", quantity: "", unit: "" });
 
 export function RecipeForm({
   initialValues,
@@ -50,73 +39,66 @@ export function RecipeForm({
   submitLabel = "Save Recipe",
 }: RecipeFormProps) {
   const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
-  const [values, setValues] = useState<RecipeFormValues>({
-    title: initialValues?.title ?? "",
-    description: initialValues?.description ?? "",
-    difficulty: initialValues?.difficulty ?? "",
-    time_minutes: initialValues?.time_minutes ?? "",
-    ingredients: initialValues?.ingredients ?? [emptyIngredient()],
-    instructions: initialValues?.instructions ?? [""],
-    tag_ids: initialValues?.tag_ids ?? [],
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<RecipeFormSchema>({
+    resolver: zodResolver(recipeFormSchema),
+    defaultValues: {
+      title: initialValues?.title ?? "",
+      description: initialValues?.description ?? "",
+      difficulty: initialValues?.difficulty ?? null,
+      time_minutes: initialValues?.time_minutes ?? "",
+      ingredients: initialValues?.ingredients?.length
+        ? initialValues.ingredients
+        : [emptyIngredient()],
+      instructions: initialValues?.instructions?.length
+        ? initialValues.instructions
+        : [{ content: "" }],
+      tag_ids: initialValues?.tag_ids ?? [],
+    },
   });
 
-  function updateIngredient(index: number, val: IngredientRowValue) {
-    const next = [...values.ingredients];
-    next[index] = val;
-    setValues({ ...values, ingredients: next });
-  }
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({ control, name: "ingredients" });
 
-  function removeIngredient(index: number) {
-    setValues({
-      ...values,
-      ingredients: values.ingredients.filter((_, i) => i !== index),
-    });
-  }
+  const {
+    fields: instructionFields,
+    append: appendInstruction,
+    remove: removeInstruction,
+  } = useFieldArray({ control, name: "instructions" });
 
-  function updateInstruction(index: number, content: string) {
-    const next = [...values.instructions];
-    next[index] = content;
-    setValues({ ...values, instructions: next });
-  }
-
-  function removeInstruction(index: number) {
-    setValues({
-      ...values,
-      instructions: values.instructions.filter((_, i) => i !== index),
-    });
-  }
+  const tag_ids = watch("tag_ids");
 
   function toggleTag(tagId: string) {
-    const next = values.tag_ids.includes(tagId)
-      ? values.tag_ids.filter((id) => id !== tagId)
-      : [...values.tag_ids, tagId];
-    setValues({ ...values, tag_ids: next });
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      await onSubmit(values);
-    } finally {
-      setSubmitting(false);
-    }
+    const next = tag_ids.includes(tagId)
+      ? tag_ids.filter((id) => id !== tagId)
+      : [...tag_ids, tagId];
+    setValue("tag_ids", next);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 py-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 py-4">
       {/* Title */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="title">Recipe Name *</Label>
         <Input
           id="title"
-          required
           placeholder="e.g. Creamy Tomato Pasta"
-          value={values.title}
-          onChange={(e) => setValues({ ...values, title: e.target.value })}
+          {...register("title")}
           className="rounded-xl"
         />
+        {errors.title && (
+          <p className="text-sm text-destructive">{errors.title.message}</p>
+        )}
       </div>
 
       {/* Description */}
@@ -125,8 +107,7 @@ export function RecipeForm({
         <Textarea
           id="description"
           placeholder="A brief description of the recipe..."
-          value={values.description}
-          onChange={(e) => setValues({ ...values, description: e.target.value })}
+          {...register("description")}
           className="rounded-xl resize-none"
           rows={3}
         />
@@ -136,25 +117,28 @@ export function RecipeForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
           <Label>Difficulty</Label>
-          <Select
-            value={values.difficulty || "__none__"}
-            onValueChange={(v) =>
-              setValues({
-                ...values,
-                difficulty: !v || v === "__none__" ? "" : (v as Difficulty),
-              })
-            }
-          >
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Select..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none__">—</SelectItem>
-              <SelectItem value="easy">Easy</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="hard">Hard</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            control={control}
+            name="difficulty"
+            render={({ field }) => (
+              <Select
+                value={field.value ?? "__none__"}
+                onValueChange={(v) =>
+                  field.onChange(!v || v === "__none__" ? null : v)
+                }
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Select..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">—</SelectItem>
+                  <SelectItem value="easy">Easy</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="time">Time (minutes)</Label>
@@ -163,10 +147,7 @@ export function RecipeForm({
             type="number"
             min="0"
             placeholder="e.g. 30"
-            value={values.time_minutes}
-            onChange={(e) =>
-              setValues({ ...values, time_minutes: e.target.value })
-            }
+            {...register("time_minutes")}
             className="rounded-xl"
           />
         </div>
@@ -177,7 +158,7 @@ export function RecipeForm({
         <Label>Tags</Label>
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => {
-            const selected = values.tag_ids.includes(tag.id);
+            const selected = tag_ids.includes(tag.id);
             return (
               <button
                 key={tag.id}
@@ -201,26 +182,30 @@ export function RecipeForm({
       <div className="flex flex-col gap-3">
         <Label>Ingredients</Label>
         <div className="flex flex-col gap-2">
-          {values.ingredients.map((ing, i) => (
-            <IngredientRow
-              key={i}
-              value={ing}
-              onChange={(val) => updateIngredient(i, val)}
-              onRemove={() => removeIngredient(i)}
+          {ingredientFields.map((field, i) => (
+            <Controller
+              key={field.id}
+              control={control}
+              name={`ingredients.${i}`}
+              render={({ field: f }) => (
+                <IngredientRow
+                  value={f.value}
+                  onChange={f.onChange}
+                  onRemove={() => removeIngredient(i)}
+                />
+              )}
             />
           ))}
         </div>
+        {errors.ingredients?.root && (
+          <p className="text-sm text-destructive">{errors.ingredients.root.message}</p>
+        )}
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="rounded-xl self-start"
-          onClick={() =>
-            setValues({
-              ...values,
-              ingredients: [...values.ingredients, emptyIngredient()],
-            })
-          }
+          onClick={() => appendIngredient(emptyIngredient())}
         >
           <Plus size={14} />
           Add Ingredient
@@ -231,15 +216,14 @@ export function RecipeForm({
       <div className="flex flex-col gap-3">
         <Label>Instructions</Label>
         <div className="flex flex-col gap-2">
-          {values.instructions.map((step, i) => (
-            <div key={i} className="flex items-start gap-2">
+          {instructionFields.map((field, i) => (
+            <div key={field.id} className="flex items-start gap-2">
               <span className="mt-2.5 text-sm font-bold text-muted-foreground w-6 shrink-0 text-right">
                 {i + 1}.
               </span>
               <Textarea
                 placeholder={`Step ${i + 1}...`}
-                value={step}
-                onChange={(e) => updateInstruction(i, e.target.value)}
+                {...register(`instructions.${i}.content`)}
                 className="flex-1 rounded-xl resize-none"
                 rows={2}
               />
@@ -255,17 +239,15 @@ export function RecipeForm({
             </div>
           ))}
         </div>
+        {errors.instructions?.root && (
+          <p className="text-sm text-destructive">{errors.instructions.root.message}</p>
+        )}
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="rounded-xl self-start"
-          onClick={() =>
-            setValues({
-              ...values,
-              instructions: [...values.instructions, ""],
-            })
-          }
+          onClick={() => appendInstruction({ content: "" })}
         >
           <Plus size={14} />
           Add Step
@@ -284,10 +266,10 @@ export function RecipeForm({
         </Button>
         <Button
           type="submit"
-          disabled={submitting}
+          disabled={isSubmitting}
           className="flex-1 rounded-2xl h-12 font-semibold"
         >
-          {submitting ? "Saving..." : submitLabel}
+          {isSubmitting ? "Saving..." : submitLabel}
         </Button>
       </div>
     </form>

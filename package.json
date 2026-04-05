@@ -13,6 +13,5 @@
   },
   "devDependencies": {
     "nx": "^22.0.0"
-  },
-  "dependencies": {}
+  }
 }

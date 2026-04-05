@@ -33,10 +33,10 @@ export async function PUT(
     }));
 
   const instructions = (body.instructions ?? [])
-    .filter((s: string) => s.trim())
-    .map((content: string, i: number) => ({
+    .filter((ins: { content: string }) => ins.content.trim())
+    .map((ins: { content: string }, i: number) => ({
       step_number: i + 1,
-      content: content.trim(),
+      content: ins.content.trim(),
     }));
 
   await updateRecipe(id, userId, {

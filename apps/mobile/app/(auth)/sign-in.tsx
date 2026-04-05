@@ -1,16 +1,20 @@
 import { useSignIn } from '@clerk/expo';
 import { type Href, Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signInSchema, type SignInSchema } from '@recipe-app/shared';
 import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native';
 
 import { Button } from '../../components/ui/Button';
 
 export default function SignInScreen() {
-  const { signIn, errors, fetchStatus } = useSignIn();
+  const { signIn, errors: clerkErrors, fetchStatus } = useSignIn();
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [code, setCode] = useState('');
+
+  const { control, handleSubmit, getValues, formState: { errors } } = useForm<SignInSchema>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { email: '', password: '' },
+  });
 
   const pendingMfa =
     signIn.status === 'needs_second_factor' || signIn.status === 'needs_client_trust';
@@ -23,7 +27,7 @@ export default function SignInScreen() {
     });
   }
 
-  async function handleSignIn() {
+  async function handleSignIn({ email, password }: SignInSchema) {
     const { error } = await signIn.password({ emailAddress: email, password });
     if (error) return;
 
@@ -34,7 +38,7 @@ export default function SignInScreen() {
     }
   }
 
-  async function handleVerify() {
+  async function handleVerify(code: string) {
     await signIn.mfa.verifyEmailCode({ code });
     if (signIn.status === 'complete') {
       await finalize();
@@ -43,38 +47,13 @@ export default function SignInScreen() {
 
   if (pendingMfa) {
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-background"
-      >
-        <View className="flex-1 justify-center px-6 gap-4">
-          <Text className="text-3xl font-bold text-foreground">Verify your account</Text>
-          <Text className="text-muted-foreground">Enter the code sent to {email}</Text>
-
-          <TextInput
-            className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
-            placeholder="Verification code"
-            placeholderTextColor="#8a7a68"
-            keyboardType="number-pad"
-            value={code}
-            onChangeText={setCode}
-          />
-          {errors?.fields.code && (
-            <Text className="text-destructive text-sm -mt-2">{errors.fields.code.message}</Text>
-          )}
-
-          <Button
-            label="Verify"
-            onPress={handleVerify}
-            disabled={!code || fetchStatus === 'fetching'}
-          />
-          <Button
-            label="Resend code"
-            onPress={() => signIn.mfa.sendEmailCode()}
-            disabled={fetchStatus === 'fetching'}
-          />
-        </View>
-      </KeyboardAvoidingView>
+      <MfaScreen
+        email={getValues('email')}
+        fetchStatus={fetchStatus}
+        clerkErrors={clerkErrors}
+        onVerify={handleVerify}
+        onResend={() => signIn.mfa.sendEmailCode()}
+      />
     );
   }
 
@@ -86,40 +65,120 @@ export default function SignInScreen() {
       <View className="flex-1 justify-center px-6 gap-4">
         <Text className="text-3xl font-bold text-foreground">Welcome back</Text>
 
-        <TextInput
-          className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
-          placeholder="Email"
-          placeholderTextColor="#8a7a68"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <TextInput
+              className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
+              placeholder="Email"
+              placeholderTextColor="#8a7a68"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
-        {errors?.fields.identifier && (
-          <Text className="text-destructive text-sm -mt-2">{errors.fields.identifier.message}</Text>
+        {errors.email && (
+          <Text className="text-destructive text-sm -mt-2">{errors.email.message}</Text>
         )}
 
-        <TextInput
-          className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
-          placeholder="Password"
-          placeholderTextColor="#8a7a68"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <TextInput
+              className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
+              placeholder="Password"
+              placeholderTextColor="#8a7a68"
+              secureTextEntry
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
-        {errors?.fields.password && (
-          <Text className="text-destructive text-sm -mt-2">{errors.fields.password.message}</Text>
+        {errors.password && (
+          <Text className="text-destructive text-sm -mt-2">{errors.password.message}</Text>
+        )}
+        {clerkErrors?.fields.password && (
+          <Text className="text-destructive text-sm -mt-2">{clerkErrors.fields.password.message}</Text>
         )}
 
         <Button
           label="Sign in"
-          onPress={handleSignIn}
-          disabled={!email || !password || fetchStatus === 'fetching'}
+          onPress={handleSubmit(handleSignIn)}
+          disabled={fetchStatus === 'fetching'}
         />
 
         <Link href="/(auth)/sign-up" className="text-center text-muted-foreground">
           Don't have an account? <Text className="text-primary">Sign up</Text>
         </Link>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+function MfaScreen({
+  email,
+  fetchStatus,
+  clerkErrors,
+  onVerify,
+  onResend,
+}: {
+  email: string;
+  fetchStatus: string;
+  clerkErrors: ReturnType<typeof useSignIn>['errors'];
+  onVerify: (code: string) => Promise<void>;
+  onResend: () => void;
+}) {
+  const { control, handleSubmit, formState: { errors } } = useForm<{ code: string }>({
+    defaultValues: { code: '' },
+  });
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-background"
+    >
+      <View className="flex-1 justify-center px-6 gap-4">
+        <Text className="text-3xl font-bold text-foreground">Verify your account</Text>
+        <Text className="text-muted-foreground">Enter the code sent to {email}</Text>
+
+        <Controller
+          control={control}
+          name="code"
+          rules={{ required: 'Code is required' }}
+          render={({ field: { value, onChange, onBlur } }) => (
+            <TextInput
+              className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
+              placeholder="Verification code"
+              placeholderTextColor="#8a7a68"
+              keyboardType="number-pad"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
+        />
+        {(errors.code || clerkErrors?.fields.code) && (
+          <Text className="text-destructive text-sm -mt-2">
+            {errors.code?.message ?? clerkErrors?.fields.code?.message}
+          </Text>
+        )}
+
+        <Button
+          label="Verify"
+          onPress={handleSubmit(({ code }) => onVerify(code))}
+          disabled={fetchStatus === 'fetching'}
+        />
+        <Button
+          label="Resend code"
+          onPress={onResend}
+          disabled={fetchStatus === 'fetching'}
+        />
       </View>
     </KeyboardAvoidingView>
   );
