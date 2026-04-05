@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { createRecipe } from "@/lib/db/recipes";
+import { createRecipe, getRecipes } from "@/lib/db/recipes";
+
+export async function GET() {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const recipes = await getRecipes(userId);
+  return NextResponse.json(recipes);
+}
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
