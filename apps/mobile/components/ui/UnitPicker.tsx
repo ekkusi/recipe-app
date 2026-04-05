@@ -23,7 +23,7 @@ export function UnitPicker({ value, onChange }: UnitPickerProps) {
         onPress={() => setOpen(true)}
         className="bg-input border border-border rounded-xl px-3 py-2.5 items-center justify-center active:opacity-75"
       >
-        <Text className={`text-sm ${value ? 'text-foreground' : 'text-muted-foreground'}`}>
+        <Text className={`text-sm ${value ? 'text-foreground' : 'text-muted-foreground'}`} numberOfLines={1}>
           {value || t('units.placeholder')}
         </Text>
       </Pressable>
@@ -33,7 +33,7 @@ export function UnitPicker({ value, onChange }: UnitPickerProps) {
           className="flex-1 bg-black/40 justify-end"
           onPress={() => setOpen(false)}
         >
-          <Pressable onPress={() => {}}>
+          <Pressable onPress={() => { }}>
             <View className="bg-card rounded-t-3xl px-4 pt-4 pb-8">
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-base font-bold text-foreground">{t('units.selectTitle')}</Text>
@@ -45,9 +45,8 @@ export function UnitPicker({ value, onChange }: UnitPickerProps) {
                 {/* None option */}
                 <TouchableOpacity
                   onPress={() => select('')}
-                  className={`py-3 px-4 rounded-xl mb-1 active:opacity-75 ${
-                    !value ? 'bg-primary' : 'bg-muted'
-                  }`}
+                  className={`py-3 px-4 rounded-xl mb-1 active:opacity-75 ${!value ? 'bg-primary' : 'bg-muted'
+                    }`}
                 >
                   <Text className={`font-medium ${!value ? 'text-primary-foreground' : 'text-foreground'}`}>
                     {t('units.none')}
@@ -57,14 +56,12 @@ export function UnitPicker({ value, onChange }: UnitPickerProps) {
                   <TouchableOpacity
                     key={u.value}
                     onPress={() => select(u.value)}
-                    className={`py-3 px-4 rounded-xl mb-1 active:opacity-75 ${
-                      value === u.value ? 'bg-primary' : 'bg-muted'
-                    }`}
+                    className={`py-3 px-4 rounded-xl mb-1 active:opacity-75 ${value === u.value ? 'bg-primary' : 'bg-muted'
+                      }`}
                   >
                     <Text
-                      className={`font-medium ${
-                        value === u.value ? 'text-primary-foreground' : 'text-foreground'
-                      }`}
+                      className={`font-medium ${value === u.value ? 'text-primary-foreground' : 'text-foreground'
+                        }`}
                     >
                       {u.label}
                     </Text>

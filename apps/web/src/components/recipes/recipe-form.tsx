@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -33,6 +34,7 @@ interface RecipeFormProps {
 
 const emptyIngredient = () => ({ name: "", quantity: "", unit: "" });
 
+
 export function RecipeForm({
   initialValues,
   tags,
@@ -43,6 +45,7 @@ export function RecipeForm({
   const t = useTranslations('recipes');
   const tCommon = useTranslations('common');
   const resolvedSubmitLabel = submitLabel ?? t('saveRecipe');
+  const [autoFocusIngredientIndex, setAutoFocusIngredientIndex] = useState<number | null>(null);
 
   const {
     control,
@@ -50,6 +53,7 @@ export function RecipeForm({
     handleSubmit,
     watch,
     setValue,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<RecipeFormSchema>({
     resolver: zodResolver(recipeFormSchema),
@@ -196,6 +200,7 @@ export function RecipeForm({
                   value={f.value}
                   onChange={f.onChange}
                   onRemove={() => removeIngredient(i)}
+                  autoFocus={autoFocusIngredientIndex === i}
                 />
               )}
             />
@@ -209,7 +214,10 @@ export function RecipeForm({
           variant="outline"
           size="sm"
           className="rounded-xl self-start"
-          onClick={() => appendIngredient(emptyIngredient())}
+          onClick={() => {
+            setAutoFocusIngredientIndex(ingredientFields.length);
+            appendIngredient(emptyIngredient());
+          }}
         >
           <Plus size={14} />
           {t('form.addIngredient')}
@@ -251,7 +259,11 @@ export function RecipeForm({
           variant="outline"
           size="sm"
           className="rounded-xl self-start"
-          onClick={() => appendInstruction({ content: "" })}
+          onClick={() => {
+            const newIndex = instructionFields.length;
+            appendInstruction({ content: "" });
+            setTimeout(() => setFocus(`instructions.${newIndex}.content`), 0);
+          }}
         >
           <Plus size={14} />
           {t('form.addStep')}

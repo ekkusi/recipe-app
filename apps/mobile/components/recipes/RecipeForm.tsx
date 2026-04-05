@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Tag } from '@recipe-app/shared';
@@ -26,6 +27,8 @@ export function RecipeForm({
   onCancel,
 }: RecipeFormProps) {
   const { t } = useTranslation();
+  const ingredientNameRefs = useRef<(TextInput | null)[]>([]);
+  const instructionRefs = useRef<(TextInput | null)[]>([]);
 
   const {
     control,
@@ -203,6 +206,7 @@ export function RecipeForm({
               render={({ field: f }) => (
                 <View className="flex-row gap-2 items-center">
                   <TextInput
+                    ref={(r) => { ingredientNameRefs.current[i] = r; }}
                     className="flex-1 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
                     placeholder={t('recipes.form_ingredient')}
                     placeholderTextColor="#8a7a68"
@@ -237,7 +241,11 @@ export function RecipeForm({
           <Text className="text-destructive text-sm mt-1">{errors.ingredients.root.message}</Text>
         )}
         <TouchableOpacity
-          onPress={() => appendIngredient(emptyIngredient())}
+          onPress={() => {
+            const newIndex = ingredientFields.length;
+            appendIngredient(emptyIngredient());
+            setTimeout(() => ingredientNameRefs.current[newIndex]?.focus(), 50);
+          }}
           className="mt-2 self-start"
         >
           <Text className="text-primary text-sm font-semibold">{t('recipes.form_addIngredient')}</Text>
@@ -259,6 +267,7 @@ export function RecipeForm({
                     {i + 1}.
                   </Text>
                   <TextInput
+                    ref={(r) => { instructionRefs.current[i] = r; }}
                     className="flex-1 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
                     placeholder={t('recipes.form_stepPlaceholder', { step: i + 1 })}
                     placeholderTextColor="#8a7a68"
@@ -285,7 +294,11 @@ export function RecipeForm({
           <Text className="text-destructive text-sm mt-1">{errors.instructions.root.message}</Text>
         )}
         <TouchableOpacity
-          onPress={() => appendInstruction({ content: '' })}
+          onPress={() => {
+            const newIndex = instructionFields.length;
+            appendInstruction({ content: '' });
+            setTimeout(() => instructionRefs.current[newIndex]?.focus(), 50);
+          }}
           className="mt-2 self-start"
         >
           <Text className="text-primary text-sm font-semibold">{t('recipes.form_addStep')}</Text>

@@ -22,9 +22,10 @@ interface IngredientRowProps {
   value: IngredientRowValue;
   onChange: (value: IngredientRowValue) => void;
   onRemove: () => void;
+  autoFocus?: boolean;
 }
 
-export function IngredientRow({ value, onChange, onRemove }: IngredientRowProps) {
+export function IngredientRow({ value, onChange, onRemove, autoFocus }: IngredientRowProps) {
   return (
     <div className="flex items-center gap-2">
       <Input
@@ -32,6 +33,7 @@ export function IngredientRow({ value, onChange, onRemove }: IngredientRowProps)
         value={value.name}
         onChange={(e) => onChange({ ...value, name: e.target.value })}
         className="flex-1 rounded-xl"
+        autoFocus={autoFocus}
       />
       <Input
         placeholder="Qty"
