@@ -13,7 +13,7 @@ module.exports = {
         background: '#faf7f0',
         foreground: '#362d22',
         primary: {
-          DEFAULT: '#c27070',
+          DEFAULT: '#b06060',
           foreground: '#faf4f4',
         },
         secondary: {
@@ -34,7 +34,7 @@ module.exports = {
         },
         border: '#e6e1da',
         input: '#ece8e1',
-        ring: '#c27070',
+        ring: '#b06060',
         destructive: {
           DEFAULT: '#e05a3a',
           foreground: '#ffffff',

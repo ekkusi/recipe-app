@@ -1,40 +1,36 @@
-import { useSignUp } from '@clerk/clerk-expo';
-import { Link } from 'expo-router';
+import { useSignUp } from '@clerk/expo';
+import { type Href, Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native';
+
+import { Button } from '../../components/ui/Button';
 
 export default function SignUpScreen() {
-  const { signUp, setActive, isLoaded } = useSignUp();
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
-  const [pendingVerification, setPendingVerification] = useState(false);
-  const [error, setError] = useState('');
+
+  const pendingVerification =
+    signUp.status === 'missing_requirements' &&
+    signUp.unverifiedFields.includes('email_address') &&
+    signUp.missingFields.length === 0;
 
   async function handleSignUp() {
-    if (!isLoaded) return;
-    setError('');
-    try {
-      await signUp.create({ emailAddress: email, password });
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      setPendingVerification(true);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Sign up failed';
-      setError(msg);
-    }
+    const { error } = await signUp.password({ emailAddress: email, password });
+    if (error) return;
+    await signUp.verifications.sendEmailCode();
   }
 
   async function handleVerify() {
-    if (!isLoaded) return;
-    setError('');
-    try {
-      const result = await signUp.attemptEmailAddressVerification({ code });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Verification failed';
-      setError(msg);
+    await signUp.verifications.verifyEmailCode({ code });
+    if (signUp.status === 'complete') {
+      await signUp.finalize({
+        navigate: ({ decorateUrl }) => {
+          router.replace(decorateUrl('/(app)') as Href);
+        },
+      });
     }
   }
 
@@ -57,6 +53,9 @@ export default function SignUpScreen() {
               value={email}
               onChangeText={setEmail}
             />
+            {errors?.fields.emailAddress && (
+              <Text className="text-destructive text-sm -mt-2">{errors.fields.emailAddress.message}</Text>
+            )}
 
             <TextInput
               className="bg-input border border-border rounded-2xl px-4 py-3 text-foreground"
@@ -66,15 +65,15 @@ export default function SignUpScreen() {
               value={password}
               onChangeText={setPassword}
             />
+            {errors?.fields.password && (
+              <Text className="text-destructive text-sm -mt-2">{errors.fields.password.message}</Text>
+            )}
 
-            {error ? <Text className="text-destructive text-sm">{error}</Text> : null}
-
-            <Pressable
-              className="bg-primary rounded-3xl py-4 items-center"
+            <Button
+              label="Sign up"
               onPress={handleSignUp}
-            >
-              <Text className="text-primary-foreground font-semibold text-base">Sign up</Text>
-            </Pressable>
+              disabled={!email || !password || fetchStatus === 'fetching'}
+            />
 
             <Link href="/(auth)/sign-in" className="text-center text-muted-foreground">
               Already have an account? <Text className="text-primary">Sign in</Text>
@@ -93,15 +92,15 @@ export default function SignUpScreen() {
               value={code}
               onChangeText={setCode}
             />
+            {errors?.fields.code && (
+              <Text className="text-destructive text-sm -mt-2">{errors.fields.code.message}</Text>
+            )}
 
-            {error ? <Text className="text-destructive text-sm">{error}</Text> : null}
-
-            <Pressable
-              className="bg-primary rounded-3xl py-4 items-center"
+            <Button
+              label="Verify"
               onPress={handleVerify}
-            >
-              <Text className="text-primary-foreground font-semibold text-base">Verify</Text>
-            </Pressable>
+              disabled={!code || fetchStatus === 'fetching'}
+            />
           </>
         )}
       </View>

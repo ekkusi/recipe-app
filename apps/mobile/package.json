@@ -11,7 +11,7 @@
     "expo-install": "expo install"
   },
   "dependencies": {
-    "@clerk/clerk-expo": "^2.19.31",
+    "@clerk/expo": "^3.1.6",
     "@recipe-app/shared": "*",
     "@shopify/flash-list": "2.0.2",
     "@tanstack/react-query": "^5.96.2",

@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/expo';
 import { useQuery } from '@tanstack/react-query';
 import type { ShoppingItem } from '@recipe-app/shared';
 import { FlashList } from '@shopify/flash-list';

@@ -17,7 +17,7 @@ NX monorepo with npm workspaces:
 - **Expo SDK 55** + **Expo Router** (file-based nav) — `apps/mobile/`
 - **Tailwind CSS v4** (web) / **NativeWind v4** (mobile) — keep design tokens in sync between apps
 - **ShadCN UI v4** (web) — components in `apps/web/src/components/ui/`; uses `@base-ui/react` (not Radix), no `asChild` prop; use `render={<Link />}` for polymorphic buttons
-- **Clerk** — auth for both apps (`@clerk/nextjs` on web, `@clerk/clerk-expo` on mobile)
+- **Clerk** — auth for both apps (`@clerk/nextjs` on web, `@clerk/expo` on mobile)
 - **Supabase** — PostgreSQL via service role key (no Supabase auth); `user_id` = Clerk `userId` stored as `text`
 - **TanStack Query v5** — data fetching on mobile against web's `/api/*` routes
 - **next-pwa** — PWA manifest at `apps/web/public/manifest.json`, disabled in development
@@ -26,7 +26,7 @@ NX monorepo with npm workspaces:
 
 Both apps share a pastel theme — keep styling consistent across platforms:
 - **Background**: cream (`#faf7f0` / `bg-background`)
-- **Primary**: dusty rose (`#c27070`)
+- **Primary**: dusty rose (`#b06060`)
 - **Secondary**: sage (`#d9eadc`)
 - **Accent**: lavender (`#d5cee6`)
 - **Font**: Nunito (rounded)

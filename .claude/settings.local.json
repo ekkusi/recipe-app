@@ -12,7 +12,10 @@
       "WebFetch(domain:expo.dev)",
       "WebFetch(domain:dev.to)",
       "WebFetch(domain:mmazzarolo.com)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx expo:*)",
+      "Bash(npm uninstall:*)",
+      "WebFetch(domain:clerk.com)"
     ]
   }
 }
