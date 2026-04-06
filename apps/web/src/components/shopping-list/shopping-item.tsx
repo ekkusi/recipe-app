@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 interface ShoppingItemProps {
   id: string;
   name: string;
-  quantity: number | null;
+  quantity: string | null;
   unit: string | null;
   checked: boolean;
   onToggle: (id: string, checked: boolean) => void;
