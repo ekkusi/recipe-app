@@ -4,7 +4,7 @@ import type { Tag } from '@recipe-app/shared';
 import type { RecipeFormSchema } from '@recipe-app/shared';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
 import { apiFetch } from '../../../lib/api';
 import { RecipeForm } from '../../../components/recipes/RecipeForm';
@@ -40,7 +40,10 @@ export default function NewRecipeScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1 bg-background"
+    >
       <View className="px-4 pt-14 pb-4">
         <Text className="text-2xl font-bold text-foreground">{t('recipes.newRecipe')}</Text>
       </View>
@@ -52,6 +55,6 @@ export default function NewRecipeScreen() {
         submitLabel={t('recipes.createRecipe')}
         onCancel={() => router.back()}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

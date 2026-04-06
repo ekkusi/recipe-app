@@ -269,7 +269,7 @@ export default function ShoppingListScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       className="flex-1 bg-background"
     >
       {/* Header */}
@@ -481,9 +481,8 @@ function ShoppingItemRow({
         className="flex-row items-center px-4 py-3 gap-3 active:opacity-75"
       >
         <View
-          className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-            item.checked ? 'bg-primary border-primary' : 'border-border'
-          }`}
+          className={`w-5 h-5 rounded-full border-2 items-center justify-center ${item.checked ? 'bg-primary border-primary' : 'border-border'
+            }`}
         >
           {item.checked && <Text className="text-white text-xs font-bold">✓</Text>}
         </View>

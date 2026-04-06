@@ -4,7 +4,7 @@ import type { Recipe, Tag } from '@recipe-app/shared';
 import type { RecipeFormSchema } from '@recipe-app/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
 import { apiFetch } from '../../../../lib/api';
 import { RecipeForm } from '../../../../components/recipes/RecipeForm';
@@ -75,10 +75,14 @@ export default function EditRecipeScreen() {
     })),
     instructions: instructions.map((ins) => ({ content: ins.content })),
     tag_ids: recipe.recipe_tags?.map((rt) => rt.tag_id) ?? [],
+    is_private: recipe.is_private ?? false,
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1 bg-background"
+    >
       <View className="px-4 pt-14 pb-4">
         <Text className="text-2xl font-bold text-foreground">{t('recipes.editRecipe')}</Text>
       </View>
@@ -91,6 +95,6 @@ export default function EditRecipeScreen() {
         submitLabel={t('recipes.saveChanges')}
         onCancel={() => router.back()}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

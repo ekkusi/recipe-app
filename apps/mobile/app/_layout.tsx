@@ -2,6 +2,7 @@ import '../global.css';
 import '../i18n';
 
 import { ClerkProvider, useAuth } from '@clerk/expo';
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { tokenCache } from '@clerk/expo/token-cache';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Slot, useRouter, useSegments } from 'expo-router';
@@ -35,7 +36,9 @@ export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <QueryClientProvider client={queryClient}>
-        <AuthGuard />
+        <KeyboardProvider>
+          <AuthGuard />
+        </KeyboardProvider>
       </QueryClientProvider>
     </ClerkProvider>
   );

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { UnitPicker } from '../ui/UnitPicker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 interface RecipeFormProps {
   initialValues?: Partial<RecipeFormSchema>;
@@ -77,9 +78,10 @@ export function RecipeForm({
   }
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       className="flex-1"
       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
+      bottomOffset={60}
       keyboardShouldPersistTaps="handled"
     >
       {/* Title */}
@@ -241,6 +243,13 @@ export function RecipeForm({
         {errors.ingredients?.root && (
           <Text className="text-destructive text-sm mt-1">{errors.ingredients.root.message}</Text>
         )}
+        {errors.ingredients && !errors.ingredients.root && ingredientFields.map((_, i) => (
+          errors.ingredients?.[i]?.name && (
+            <Text key={i} className="text-destructive text-sm mt-1">
+              {t('recipes.form_ingredient')} {i + 1}: {errors.ingredients[i]?.name?.message}
+            </Text>
+          )
+        ))}
         <TouchableOpacity
           onPress={() => {
             const newIndex = ingredientFields.length;
@@ -294,6 +303,13 @@ export function RecipeForm({
         {errors.instructions?.root && (
           <Text className="text-destructive text-sm mt-1">{errors.instructions.root.message}</Text>
         )}
+        {errors.instructions && !errors.instructions.root && instructionFields.map((_, i) => (
+          errors.instructions?.[i]?.content && (
+            <Text key={i} className="text-destructive text-sm mt-1">
+              {t('recipes.form_stepPlaceholder', { step: i + 1 })}: {errors.instructions[i]?.content?.message}
+            </Text>
+          )
+        ))}
         <TouchableOpacity
           onPress={() => {
             const newIndex = instructionFields.length;
@@ -316,9 +332,8 @@ export function RecipeForm({
             className="flex-row items-center gap-2 self-start active:opacity-75 mb-2"
           >
             <View
-              className={`w-5 h-5 rounded border-2 items-center justify-center ${
-                field.value ? 'bg-primary border-primary' : 'border-border bg-input'
-              }`}
+              className={`w-5 h-5 rounded border-2 items-center justify-center ${field.value ? 'bg-primary border-primary' : 'border-border bg-input'
+                }`}
             >
               {field.value && <Text className="text-white text-xs font-bold">✓</Text>}
             </View>
@@ -346,6 +361,6 @@ export function RecipeForm({
           </Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }

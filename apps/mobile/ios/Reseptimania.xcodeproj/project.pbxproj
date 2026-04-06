@@ -15,6 +15,8 @@
 		D18B13B4057EBB33188913C9 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52606DE6F7772DED6855033D /* ExpoModulesProvider.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		FDB7E49D8B6D489BBA6CB530 /* ClerkViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5AF38DDA1C453E8617F61F /* ClerkViewFactory.swift */; };
+		25B535B59CCA48189EA9F939 = {isa = PBXBuildFile; fileRef = C5D32EBCC52241029AD6F7E4 /* ClerkViewFactory.swift */; };
+		CE84E3CC657F48F69F4681ED = {isa = PBXBuildFile; fileRef = 84A8D901003D4A15A9F3E2D9 /* ClerkViewFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Reseptimania/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Reseptimania-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Reseptimania-Bridging-Header.h"; path = "Reseptimania/Reseptimania-Bridging-Header.h"; sourceTree = "<group>"; };
+		C5D32EBCC52241029AD6F7E4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
+		84A8D901003D4A15A9F3E2D9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,8 @@
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				4A5AF38DDA1C453E8617F61F /* ClerkViewFactory.swift */,
 				535751C4C44D1AC01C1097B5 /* PrivacyInfo.xcprivacy */,
+				C5D32EBCC52241029AD6F7E4 /* ClerkViewFactory.swift */,
+				84A8D901003D4A15A9F3E2D9 /* ClerkViewFactory.swift */,
 			);
 			name = Reseptimania;
 			sourceTree = "<group>";
@@ -159,6 +165,10 @@
 			packageProductDependencies = (
 				A8E9F108BCEF414C835F6AF8 /* ClerkKit */,
 				34761D77C4AD4527AACFBC55 /* ClerkKitUI */,
+				5EF5B42C6C8844CC909A389C /* ClerkKit */,
+				E853E664DFEC4C36A08BCF9B /* ClerkKitUI */,
+				9549420DEBC74FA7A21AB122 /* ClerkKit */,
+				DFD9AF7662814B3B8270E391 /* ClerkKitUI */,
 			);
 			productName = Reseptimania;
 			productReference = 13B07F961A680F5B00A75B9A /* Reseptimania.app */;
@@ -188,6 +198,7 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
 				6B0D7A95C6A04669B10D7DA1 /* XCRemoteSwiftPackageReference "clerk-ios" */,
+				B41B91D4E2D24A01A1BA8D92 /* clerk-ios */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -350,6 +361,8 @@
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
 				FDB7E49D8B6D489BBA6CB530 /* ClerkViewFactory.swift in Sources */,
 				D18B13B4057EBB33188913C9 /* ExpoModulesProvider.swift in Sources */,
+				25B535B59CCA48189EA9F939 /* ClerkViewFactory.swift */,
+				CE84E3CC657F48F69F4681ED /* ClerkViewFactory.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,11 +396,11 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.reseptimania.twa;
-				PRODUCT_NAME = Reseptimania;
+				PRODUCT_NAME = "Reseptimania";
 				SWIFT_OBJC_BRIDGING_HEADER = "Reseptimania/Reseptimania-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -414,10 +427,10 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.reseptimania.twa;
-				PRODUCT_NAME = Reseptimania;
+				PRODUCT_NAME = "Reseptimania";
 				SWIFT_OBJC_BRIDGING_HEADER = "Reseptimania/Reseptimania-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -576,6 +589,22 @@
 				version = 1.0.0;
 			};
 		};
+		B41B91D4E2D24A01A1BA8D92 = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = https://github.com/clerk/clerk-ios.git;
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
+		16D7B34EC3394C97A22F3859 = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = https://github.com/clerk/clerk-ios.git;
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -588,6 +617,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6B0D7A95C6A04669B10D7DA1 /* XCRemoteSwiftPackageReference "clerk-ios" */;
 			productName = ClerkKit;
+		};
+		5EF5B42C6C8844CC909A389C = {
+			isa = XCSwiftPackageProductDependency;
+			package = B41B91D4E2D24A01A1BA8D92;
+			productName = ClerkKit;
+		};
+		E853E664DFEC4C36A08BCF9B = {
+			isa = XCSwiftPackageProductDependency;
+			package = B41B91D4E2D24A01A1BA8D92;
+			productName = ClerkKitUI;
+		};
+		9549420DEBC74FA7A21AB122 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 16D7B34EC3394C97A22F3859;
+			productName = ClerkKit;
+		};
+		DFD9AF7662814B3B8270E391 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 16D7B34EC3394C97A22F3859;
+			productName = ClerkKitUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
