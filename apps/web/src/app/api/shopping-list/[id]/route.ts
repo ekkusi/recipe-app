@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { toggleShoppingItem, deleteShoppingItem } from "@/lib/db/shopping-list";
+import { toggleShoppingItem, deleteShoppingItem, getOrCreateDefaultList } from "@/lib/db/shopping-list";
 
+// Legacy route — resolves listId from user's default list
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -10,8 +11,9 @@ export async function PATCH(
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const defaultList = await getOrCreateDefaultList(userId);
   const { checked } = await req.json();
-  await toggleShoppingItem(id, checked);
+  await toggleShoppingItem(id, checked, defaultList.id, userId);
   return NextResponse.json({ ok: true });
 }
 
@@ -23,6 +25,7 @@ export async function DELETE(
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  await deleteShoppingItem(id);
+  const defaultList = await getOrCreateDefaultList(userId);
+  await deleteShoppingItem(id, defaultList.id, userId);
   return NextResponse.json({ ok: true });
 }

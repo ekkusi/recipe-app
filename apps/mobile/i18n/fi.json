@@ -80,7 +80,17 @@
     "clearAll": "Tyhjennä kaikki",
     "loadError": "Listan lataaminen epäonnistui",
     "empty_title": "Lista on tyhjä",
-    "empty_subtitle": "Lisää tuotteita ylhäältä tai reseptistä"
+    "empty_subtitle": "Lisää tuotteita ylhäältä tai reseptistä",
+    "newList": "Uusi lista",
+    "listNamePlaceholder": "Listan nimi",
+    "createList": "Luo lista",
+    "renameList": "Muokkaa nimeä",
+    "deleteList": "Poista lista",
+    "deleteConfirm": "Haluatko varmasti poistaa tämän listan?",
+    "invite": "Kutsu ihmisiä",
+    "inviteLinkCopied": "Kutsulink kopioitu!",
+    "selectList": "Valitse lista",
+    "members": "{{count}} jäsentä"
   },
   "units": {
     "selectTitle": "Valitse yksikkö",
@@ -89,6 +99,26 @@
   },
   "nav": {
     "recipes": "Reseptit",
-    "shopping": "Ostoslista"
-  }
+    "shopping": "Ostoslista",
+    "collections": "Kokoelmat"
+  },
+  "privacy": {
+    "public": "Julkinen",
+    "private": "Yksityinen",
+    "shareLink": "Jaa linkki",
+    "linkCopied": "Linkki kopioitu!",
+    "privateWarning": "Resepti on yksityinen — muut eivät pysty avaamaan tätä linkkiä",
+    "copyToCollection": "Kopioi omaan kokoelmaan",
+    "copiedToCollection": "Lisätty!"
+  },
+  "collections": {
+    "title": "Kokoelmat",
+    "new": "Uusi kokoelma",
+    "name": "Kokoelman nimi",
+    "addToCollection": "Lisää kokoelmaan",
+    "removeFromCollection": "Poista kokoelmasta",
+    "recipeCount": "{{count}} reseptiä",
+    "empty_title": "Ei kokoelmia vielä",
+    "empty_subtitle": "Lisää reseptejä kokoelmaan reseptin sivulta"
+  },
 }

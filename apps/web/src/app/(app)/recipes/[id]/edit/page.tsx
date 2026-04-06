@@ -40,6 +40,7 @@ export default function EditRecipePage() {
         tag_ids: (recipe.recipe_tags ?? []).map(
           (rt: { tag_id: string }) => rt.tag_id
         ),
+        is_private: recipe.is_private ?? false,
       });
     });
   }, [id]);

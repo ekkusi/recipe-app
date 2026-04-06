@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Globe, Lock } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -44,6 +44,7 @@ export function RecipeForm({
   const router = useRouter();
   const t = useTranslations('recipes');
   const tCommon = useTranslations('common');
+  const tPrivacy = useTranslations('privacy');
   const resolvedSubmitLabel = submitLabel ?? t('saveRecipe');
   const [autoFocusIngredientIndex, setAutoFocusIngredientIndex] = useState<number | null>(null);
 
@@ -69,6 +70,7 @@ export function RecipeForm({
         ? initialValues.instructions
         : [{ content: "" }],
       tag_ids: initialValues?.tag_ids ?? [],
+      is_private: initialValues?.is_private ?? false,
     },
   });
 
@@ -185,6 +187,22 @@ export function RecipeForm({
           })}
         </div>
       </div>
+
+      {/* Privacy */}
+      <Controller
+        control={control}
+        name="is_private"
+        render={({ field }) => (
+          <button
+            type="button"
+            onClick={() => field.onChange(!field.value)}
+            className="flex items-center gap-2 w-fit rounded-xl border border-border px-3 py-2 text-sm hover:bg-muted transition-colors"
+          >
+            {field.value ? <Lock size={14} /> : <Globe size={14} />}
+            {field.value ? tPrivacy('private') : tPrivacy('public')}
+          </button>
+        )}
+      />
 
       {/* Ingredients */}
       <div className="flex flex-col gap-3">

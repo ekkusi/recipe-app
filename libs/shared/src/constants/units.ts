@@ -1,14 +1,15 @@
 export const UNITS = [
-  { value: "g", label: "g (grams)" },
+  { value: "g", label: "g" },
   { value: "kg", label: "kg" },
   { value: "ml", label: "ml" },
-  { value: "L", label: "L (litres)" },
-  { value: "tsp", label: "tsp" },
-  { value: "tbsp", label: "tbsp" },
-  { value: "cup", label: "cup" },
+  { value: "dl", label: "dl" },
+  { value: "l", label: "l" },
+  { value: "tsp", label: "tl (teelusikka)" },
+  { value: "tbsp", label: "rkl (ruokalusikka)" },
+  { value: "cup", label: "kuppi" },
   { value: "oz", label: "oz" },
   { value: "lb", label: "lb" },
-  { value: "piece", label: "piece(s)" },
+  { value: "piece", label: "kpl" },
 ] as const;
 
 export type Unit = (typeof UNITS)[number]["value"];

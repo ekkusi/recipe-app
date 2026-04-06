@@ -50,6 +50,7 @@ export function RecipeForm({
         ? initialValues.instructions
         : [{ content: '' }],
       tag_ids: initialValues?.tag_ids ?? [],
+      is_private: initialValues?.is_private ?? false,
     },
   });
 
@@ -304,6 +305,22 @@ export function RecipeForm({
           <Text className="text-primary text-sm font-semibold">{t('recipes.form_addStep')}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Privacy */}
+      <Controller
+        control={control}
+        name="is_private"
+        render={({ field }) => (
+          <Pressable
+            onPress={() => field.onChange(!field.value)}
+            className="flex-row items-center gap-2 self-start border border-border rounded-xl px-3 py-2.5 active:opacity-75"
+          >
+            <Text className="text-sm text-foreground">
+              {field.value ? t('privacy.private') : t('privacy.public')}
+            </Text>
+          </Pressable>
+        )}
+      />
 
       {/* Actions */}
       <View className="flex-row gap-3">

@@ -17,7 +17,20 @@
       "Bash(npm uninstall:*)",
       "WebFetch(domain:clerk.com)",
       "Bash(ls /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/mobile/app/\\\\\\(auth\\\\\\)/)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shopping* -type f)",
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/packages -type f -name *.ts)",
+      "Bash(grep -r \"realtime\\\\|subscribe\\\\|channel\\\\|RefreshingAuthSession\" /Users/ekeukko/Projects/BigBoyThings/recipe-app --include=*.ts --include=*.tsx)",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/recipes/[id]/copy)",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/collections/[id]/recipes/[recipeId])",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shared-lists/[id]/items/[itemId])",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shared-lists/[id]/items/clear-checked)",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shared-lists/[id]/invite)",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/r/[id])",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/join/[token])",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/collections/[id])",
+      "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/shared-lists/[id])",
+      "WebFetch(domain:supabase.com)"
     ]
   }
 }

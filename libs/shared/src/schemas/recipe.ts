@@ -16,6 +16,7 @@ export const recipeFormSchema = z.object({
     z.object({ content: z.string().min(1, 'Kenttä on pakollinen') })
   ).min(1, 'Lisää vähintään 1 vaihe'),
   tag_ids: z.array(z.string()),
+  is_private: z.boolean(),
 });
 
 export type RecipeFormSchema = z.infer<typeof recipeFormSchema>;

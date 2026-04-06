@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ShoppingCart, Home } from "lucide-react";
+import { BookOpen, ShoppingCart, Home, FolderOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ export function BottomNav() {
     { href: "/", label: t('home'), icon: Home },
     { href: "/recipes", label: t('recipes'), icon: BookOpen },
     { href: "/shopping-list", label: t('shopping'), icon: ShoppingCart },
+    { href: "/collections", label: t('collections'), icon: FolderOpen },
   ];
 
   return (

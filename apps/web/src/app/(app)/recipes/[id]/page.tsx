@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Pencil, Clock, ChefHat, ShoppingCart } from "lucide-react";
+import { Pencil, Clock, ChefHat } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/layout/header";
-import { getRecipe } from "@/lib/db/recipes";
+import { getRecipeById } from "@/lib/db/recipes";
 import { AddToShoppingListButton } from "@/components/recipes/add-to-shopping-list-button";
+import { PrivacyToggle } from "@/components/recipes/privacy-toggle";
+import { ShareRecipeButton } from "@/components/recipes/share-recipe-button";
+import { CopyRecipeButton } from "@/components/recipes/copy-recipe-button";
+import { AddToCollectionButton } from "@/components/recipes/add-to-collection-button";
 
 export default async function RecipePage({
   params,
@@ -21,10 +25,13 @@ export default async function RecipePage({
 
   let recipe;
   try {
-    recipe = await getRecipe(id, userId!);
+    recipe = await getRecipeById(id);
+    if (recipe.is_private && recipe.user_id !== userId) notFound();
   } catch {
     notFound();
   }
+
+  const isOwner = recipe.user_id === userId;
 
   const tags = recipe.recipe_tags?.map(
     (rt: { tags: { id: string; name: string } }) => rt.tags
@@ -43,19 +50,35 @@ export default async function RecipePage({
       <Header
         title={recipe.title}
         action={
-          <Button
-            render={<Link href={`/recipes/${id}/edit`} />}
-            nativeButton={false}
-            variant="ghost"
-            size="icon"
-            className="rounded-xl"
-          >
-            <Pencil size={18} />
-          </Button>
+          isOwner ? (
+            <Button
+              render={<Link href={`/recipes/${id}/edit`} />}
+              nativeButton={false}
+              variant="ghost"
+              size="icon"
+              className="rounded-xl"
+            >
+              <Pencil size={18} />
+            </Button>
+          ) : undefined
         }
       />
 
       <div className="py-4 flex flex-col gap-6">
+        {/* Owner actions: privacy + share */}
+        {isOwner && (
+          <div className="flex flex-wrap gap-2">
+            <PrivacyToggle recipeId={id} initialIsPrivate={recipe.is_private} />
+            <ShareRecipeButton recipeId={id} isPrivate={recipe.is_private} />
+            <AddToCollectionButton recipeId={id} />
+          </div>
+        )}
+        {/* Non-owner: copy */}
+        {!isOwner && userId && (
+          <div className="flex gap-2">
+            <CopyRecipeButton recipeId={id} />
+          </div>
+        )}
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-2">
           {recipe.difficulty && (

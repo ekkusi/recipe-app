@@ -16,21 +16,74 @@ export async function getRecipes(userId: string) {
   return data;
 }
 
-export async function getRecipe(id: string, userId: string) {
+export async function getRecipeById(id: string) {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("recipes")
     .select(`
-      id, user_id, title, description, difficulty, time_minutes, created_at,
+      id, user_id, title, description, difficulty, time_minutes, is_private, created_at,
       recipe_ingredients ( id, name, quantity, unit, sort_order ),
       recipe_instructions ( id, step_number, content ),
       recipe_tags ( tag_id, tags ( id, name ) )
     `)
     .eq("id", id)
-    .eq("user_id", userId)
     .single();
   if (error) throw error;
   return data as Recipe;
+}
+
+export async function getRecipe(id: string, userId: string) {
+  const recipe = await getRecipeById(id);
+  if (recipe.is_private && recipe.user_id !== userId) {
+    throw Object.assign(new Error("Forbidden"), { status: 403 });
+  }
+  return recipe;
+}
+
+export async function copyRecipe(sourceId: string, newUserId: string) {
+  const source = await getRecipeById(sourceId);
+  const supabase = createServiceClient();
+
+  const { data: recipe, error } = await supabase
+    .from("recipes")
+    .insert({
+      user_id: newUserId,
+      title: source.title,
+      description: source.description,
+      difficulty: source.difficulty,
+      time_minutes: source.time_minutes,
+      is_private: false,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+
+  await Promise.all([
+    source.recipe_ingredients.length > 0 &&
+    supabase.from("recipe_ingredients").insert(
+      source.recipe_ingredients.map((ing) => ({
+        recipe_id: recipe.id,
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        sort_order: ing.sort_order,
+      }))
+    ),
+    source.recipe_instructions.length > 0 &&
+    supabase.from("recipe_instructions").insert(
+      source.recipe_instructions.map((ins) => ({
+        recipe_id: recipe.id,
+        step_number: ins.step_number,
+        content: ins.content,
+      }))
+    ),
+    source.recipe_tags.length > 0 &&
+    supabase.from("recipe_tags").insert(
+      source.recipe_tags.map((rt) => ({ recipe_id: recipe.id, tag_id: rt.tag_id }))
+    ),
+  ]);
+
+  return recipe.id;
 }
 
 export async function createRecipe(userId: string, data: RecipeFormData) {
@@ -44,6 +97,7 @@ export async function createRecipe(userId: string, data: RecipeFormData) {
       description: data.description || null,
       difficulty: data.difficulty,
       time_minutes: data.time_minutes,
+      is_private: data.is_private ?? false,
     })
     .select("id")
     .single();
@@ -81,6 +135,7 @@ export async function updateRecipe(
       description: data.description || null,
       difficulty: data.difficulty,
       time_minutes: data.time_minutes,
+      is_private: data.is_private ?? false,
     })
     .eq("id", id)
     .eq("user_id", userId);

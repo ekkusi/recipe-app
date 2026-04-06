@@ -24,6 +24,7 @@ export type RecipeFormData = {
   ingredients: Ingredient[];
   instructions: Instruction[];
   tag_ids: string[];
+  is_private: boolean;
 };
 
 export type Recipe = {
@@ -33,6 +34,7 @@ export type Recipe = {
   description: string | null;
   difficulty: Difficulty | null;
   time_minutes: number | null;
+  is_private: boolean;
   created_at: string;
   recipe_ingredients: Ingredient[];
   recipe_instructions: Instruction[];

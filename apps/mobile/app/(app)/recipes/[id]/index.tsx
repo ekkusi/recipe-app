@@ -3,20 +3,41 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Recipe } from '@recipe-app/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 
 import { apiFetch } from '../../../../lib/api';
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const { data: recipe, isLoading, error } = useQuery({
+  const { data: recipe, isLoading, error, refetch } = useQuery({
     queryKey: ['recipe', id],
     queryFn: () => apiFetch<Recipe>(`/api/recipes/${id}`, getToken),
   });
+
+  const isOwner = recipe ? recipe.user_id === userId : false;
+
+  async function handleTogglePrivacy() {
+    if (!recipe) return;
+    await apiFetch(`/api/recipes/${id}/privacy`, getToken, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_private: !recipe.is_private }),
+    });
+    refetch();
+  }
+
+  async function handleShare() {
+    const appUrl = process.env.EXPO_PUBLIC_API_BASE_URL ?? '';
+    await Share.share({ url: `${appUrl}/r/${id}`, message: recipe?.title ?? '' });
+  }
+
+  async function handleCopy() {
+    const { id: newId } = await apiFetch<{ id: string }>(`/api/recipes/${id}/copy`, getToken, { method: 'POST' });
+    router.replace(`/(app)/recipes/${newId}`);
+  }
 
   const addToShoppingMutation = useMutation({
     mutationFn: (ingredients: { name: string; quantity: number | null; unit: string | null }[]) =>
@@ -70,12 +91,40 @@ export default function RecipeDetailScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-75">
           <Text className="text-primary text-base font-semibold">{t('common.back')}</Text>
         </Pressable>
-        <TouchableOpacity
-          onPress={() => router.push(`/(app)/recipes/${id}/edit`)}
-          className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
-        >
-          <Text className="text-foreground text-sm font-semibold">{t('common.edit')}</Text>
-        </TouchableOpacity>
+        <View className="flex-row gap-2">
+          {isOwner && (
+            <>
+              <TouchableOpacity
+                onPress={handleTogglePrivacy}
+                className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+              >
+                <Text className="text-foreground text-sm font-semibold">
+                  {recipe?.is_private ? t('privacy.private') : t('privacy.public')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleShare}
+                className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+              >
+                <Text className="text-foreground text-sm font-semibold">{t('privacy.shareLink')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push(`/(app)/recipes/${id}/edit`)}
+                className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+              >
+                <Text className="text-foreground text-sm font-semibold">{t('common.edit')}</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          {!isOwner && (
+            <TouchableOpacity
+              onPress={handleCopy}
+              className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+            >
+              <Text className="text-foreground text-sm font-semibold">{t('privacy.copyToCollection')}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <ScrollView

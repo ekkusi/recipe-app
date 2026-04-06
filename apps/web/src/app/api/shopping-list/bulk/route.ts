@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { addShoppingItems } from "@/lib/db/shopping-list";
+import { addShoppingItems, getOrCreateDefaultList } from "@/lib/db/shopping-list";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { ingredients } = await req.json();
+  const defaultList = await getOrCreateDefaultList(userId);
   await addShoppingItems(
+    defaultList.id,
     userId,
     ingredients.map((ing: { name: string; quantity: number | null; unit: string | null }) => ({
       name: ing.name,

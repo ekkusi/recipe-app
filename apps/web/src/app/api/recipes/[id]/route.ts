@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getRecipe, updateRecipe, deleteRecipe } from "@/lib/db/recipes";
+import { getRecipeById, updateRecipe, deleteRecipe } from "@/lib/db/recipes";
 
 export async function GET(
   _req: NextRequest,
@@ -8,10 +8,16 @@ export async function GET(
 ) {
   const { id } = await params;
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const recipe = await getRecipe(id, userId);
-  return NextResponse.json(recipe);
+  try {
+    const recipe = await getRecipeById(id);
+    if (recipe.is_private && recipe.user_id !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.json(recipe);
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 }
 
 export async function PUT(
@@ -47,6 +53,7 @@ export async function PUT(
     ingredients,
     instructions,
     tag_ids: body.tag_ids ?? [],
+    is_private: body.is_private ?? false,
   });
 
   return NextResponse.json({ ok: true });

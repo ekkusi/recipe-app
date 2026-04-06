@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     ingredients,
     instructions,
     tag_ids: body.tag_ids ?? [],
+    is_private: body.is_private ?? false,
   });
 
   return NextResponse.json({ id });

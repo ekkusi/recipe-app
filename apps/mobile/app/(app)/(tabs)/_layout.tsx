@@ -18,6 +18,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: t('nav.recipes') }} />
       <Tabs.Screen name="shopping-list" options={{ title: t('nav.shopping') }} />
+      <Tabs.Screen name="collections" options={{ title: t('nav.collections') }} />
     </Tabs>
   );
 }
