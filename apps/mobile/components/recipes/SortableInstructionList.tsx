@@ -55,7 +55,6 @@ export function SortableInstructionList({
                 <Ionicons name="reorder-three-outline" size={20} color="#b06060" style={{ marginTop: 1 }} />
               </View>
             </Sortable.Handle>
-
             <View className="flex-1 py-0.5">
               <Controller
                 control={control}
@@ -85,7 +84,6 @@ export function SortableInstructionList({
           </View>
         ))}
       </Sortable.Flex>
-
       {errors.instructions?.root && (
         <Text className="text-destructive text-sm mt-1">{errors.instructions.root.message}</Text>
       )}
