@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, MoreVertical, X, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -20,6 +20,14 @@ import { getActiveListId, setActiveListId } from "@/lib/active-shopping-list";
 import type { ShoppingList, ShoppingItem as ShoppingItemType } from "@recipe-app/shared";
 
 export default function ShoppingListPage() {
+  return (
+    <Suspense>
+      <ShoppingListContent />
+    </Suspense>
+  );
+}
+
+function ShoppingListContent() {
   const t = useTranslations("shopping");
   const searchParams = useSearchParams();
   const router = useRouter();
