@@ -3,15 +3,16 @@ on:
     branches: 
       - main
     paths:
-      - .eas/workflows/submit_android.yml
       - apps/mobile/**
       - libs/shared/**
+      
+
+defaults:
+  run:
+    working-directory: ./apps/mobile
 
 jobs:
   build_android:
-    defaults:
-      run:
-        working-directory: ./apps/mobile
     name: Build Android app
     type: build
     params:
@@ -19,9 +20,6 @@ jobs:
       profile: production
 
   submit_android:
-    defaults:
-      run:
-        working-directory: ./apps/mobile
     name: Submit to Google Play Store
     needs: [build_android]
     type: submit
