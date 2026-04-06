@@ -6,7 +6,6 @@ on:
       - .eas/workflows/submit_android.yml
       - apps/mobile/**
       - libs/shared/**
-  workflow_dispatch:
 
 jobs:
   build_android:
