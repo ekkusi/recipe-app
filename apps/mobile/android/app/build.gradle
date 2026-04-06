@@ -82,14 +82,18 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
+    kotlinOptions {
+        // Clerk: allow reading metadata from newer Kotlin versions
+        freeCompilerArgs += ['-Xskip-metadata-version-check']
+    }
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.ekkusi.mobile'
+    namespace 'com.reseptimania.twa'
     defaultConfig {
-        applicationId 'com.ekkusi.mobile'
+        applicationId 'com.reseptimania.twa'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -122,6 +126,10 @@ android {
         }
     }
     packagingOptions {
+        // Clerk Android SDK: exclude duplicate META-INF files
+        resources {
+            excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
+        }
         jniLibs {
             def enableLegacyPackaging = findProperty('expo.useLegacyPackaging') ?: 'false'
             useLegacyPackaging enableLegacyPackaging.toBoolean()

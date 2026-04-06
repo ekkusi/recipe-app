@@ -1,4 +1,4 @@
-package com.ekkusi.mobile
+package com.reseptimania.twa
 
 import android.os.Build
 import android.os.Bundle
