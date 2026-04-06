@@ -11,7 +11,7 @@ export type ShoppingItem = {
   id: string;
   list_id: string;
   name: string;
-  quantity: number | null;
+  quantity: string | null;
   unit: string | null;
   checked: boolean;
   added_by: string;
@@ -20,6 +20,6 @@ export type ShoppingItem = {
 
 export type ShoppingItemInput = {
   name: string;
-  quantity: number | null;
+  quantity: string | null;
   unit: string | null;
 };

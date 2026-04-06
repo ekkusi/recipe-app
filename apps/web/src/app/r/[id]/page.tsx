@@ -98,16 +98,25 @@ export default async function PublicRecipePage({
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">{t("ingredients")}</h2>
             <div className="bg-white rounded-3xl border border-border divide-y divide-border overflow-hidden">
-              {ingredients.map((ing) => (
-                <div key={ing.id} className="flex items-center justify-between px-4 py-3">
-                  <span className="font-medium">{ing.name}</span>
-                  {(ing.quantity || ing.unit) && (
-                    <span className="text-muted-foreground text-sm">
-                      {ing.quantity} {ing.unit}
-                    </span>
-                  )}
-                </div>
-              ))}
+              {ingredients.map((ing, i) => {
+                if (ing.is_section_header) {
+                  return (
+                    <div key={ing.id ?? i} className="px-4 py-2 bg-muted/40">
+                      <span className="text-sm font-bold text-foreground">{ing.name}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <div key={ing.id ?? i} className="flex items-center justify-between px-4 py-3">
+                    <span className="font-medium">{ing.name}</span>
+                    {(ing.quantity || ing.unit) && (
+                      <span className="text-muted-foreground text-sm">
+                        {ing.quantity} {ing.unit}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

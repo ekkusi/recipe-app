@@ -70,8 +70,9 @@ export default function EditRecipeScreen() {
     time_minutes: recipe.time_minutes?.toString() ?? '',
     ingredients: ingredients.map((ing) => ({
       name: ing.name,
-      quantity: ing.quantity?.toString() ?? '',
+      quantity: ing.quantity ?? '',
       unit: ing.unit ?? '',
+      is_section_header: ing.is_section_header ?? false,
     })),
     instructions: instructions.map((ins) => ({ content: ins.content })),
     tag_ids: recipe.recipe_tags?.map((rt) => rt.tag_id) ?? [],

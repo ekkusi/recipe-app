@@ -5,6 +5,7 @@ import { ClerkProvider, useAuth } from '@clerk/expo';
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { tokenCache } from '@clerk/expo/token-cache';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -34,12 +35,14 @@ function AuthGuard() {
 
 export default function RootLayout() {
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <QueryClientProvider client={queryClient}>
-        <KeyboardProvider>
-          <AuthGuard />
-        </KeyboardProvider>
-      </QueryClientProvider>
-    </ClerkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <QueryClientProvider client={queryClient}>
+          <KeyboardProvider>
+            <AuthGuard />
+          </KeyboardProvider>
+        </QueryClientProvider>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }

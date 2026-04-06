@@ -1,16 +1,16 @@
 import { useAuth } from '@clerk/expo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ShoppingItem, ShoppingList } from '@recipe-app/shared';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   ScrollView,
+  Share,
   Text,
   TextInput,
   TouchableOpacity,
@@ -33,12 +33,14 @@ export default function ShoppingListScreen() {
     setActiveListIdState(id);
     persistActiveListId(id);
   }
+
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [listPickerOpen, setListPickerOpen] = useState(false);
   const [newListOpen, setNewListOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [renameName, setRenameName] = useState('');
 
@@ -71,9 +73,10 @@ export default function ShoppingListScreen() {
     enabled: !!resolvedListId,
   });
 
-  // Realtime subscription
+  // Realtime subscription — surgical in-place updates to preserve order
   useEffect(() => {
     if (!resolvedListId) return;
+    const key = ['shopping-list-items', resolvedListId];
     const channel = supabase
       .channel(`list-${resolvedListId}`)
       .on(
@@ -84,8 +87,32 @@ export default function ShoppingListScreen() {
           table: 'shopping_list_items',
           filter: `list_id=eq.${resolvedListId}`,
         },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['shopping-list-items', resolvedListId] });
+        (payload) => {
+          if (payload.eventType === 'UPDATE') {
+            queryClient.setQueryData(key, (old: ShoppingItem[] = []) =>
+              old.map((item) =>
+                item.id === payload.new.id ? { ...item, ...(payload.new as ShoppingItem) } : item
+              )
+            );
+          } else if (payload.eventType === 'DELETE') {
+            queryClient.setQueryData(key, (old: ShoppingItem[] = []) =>
+              old.filter((item) => item.id !== payload.old?.id)
+            );
+          } else if (payload.eventType === 'INSERT') {
+            queryClient.setQueryData(key, (old: ShoppingItem[] = []) => {
+              // Already in cache (our own real item arrived)
+              if (old.some((item) => item.id === payload.new.id)) return old;
+              // Replace a temp item if we have one (subscription beat onSuccess)
+              const tempIdx = old.findIndex((item) => item.id.startsWith('temp-'));
+              if (tempIdx !== -1) {
+                const next = [...old];
+                next[tempIdx] = payload.new as ShoppingItem;
+                return next;
+              }
+              // Item from another user — append
+              return [...old, payload.new as ShoppingItem];
+            });
+          }
         }
       )
       .subscribe();
@@ -93,16 +120,59 @@ export default function ShoppingListScreen() {
   }, [resolvedListId]);
 
   const addMutation = useMutation({
-    mutationFn: (data: { name: string; quantity: number | null; unit: string | null }) =>
+    mutationFn: (data: { name: string; quantity: string | null; unit: string | null }) =>
       apiFetch<ShoppingItem>(`/api/shopping-lists/${resolvedListId}/items`, getToken, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopping-list-items', resolvedListId] });
+    onMutate: async ({ name: n, quantity: q, unit: u }) => {
+      await queryClient.cancelQueries({ queryKey: ['shopping-list-items', resolvedListId] });
+      const prev = queryClient.getQueryData(['shopping-list-items', resolvedListId]);
+      const tempId = `temp-${Date.now()}`;
+      const tempItem: ShoppingItem = {
+        id: tempId,
+        list_id: resolvedListId!,
+        name: n,
+        quantity: q,
+        unit: u,
+        checked: false,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData(['shopping-list-items', resolvedListId], (old: ShoppingItem[] = []) =>
+        [...old, tempItem]
+      );
       setName('');
       setQuantity('');
       setUnit('');
+      return { prev, tempId };
+    },
+    onSuccess: (realItem, _, ctx) => {
+      // Replace temp item with real item in-place (preserves position)
+      queryClient.setQueryData(['shopping-list-items', resolvedListId], (old: ShoppingItem[] = []) =>
+        old.map((item) => (item.id === ctx?.tempId ? realItem : item))
+      );
+    },
+    onError: (_, __, ctx) => {
+      queryClient.setQueryData(['shopping-list-items', resolvedListId], ctx?.prev);
+    },
+  });
+
+  const updateItemMutation = useMutation({
+    mutationFn: ({ id, name: n }: { id: string; name: string }) =>
+      apiFetch(`/api/shopping-lists/${resolvedListId}/items/${id}`, getToken, {
+        method: 'PATCH',
+        body: JSON.stringify({ name: n }),
+      }),
+    onMutate: async ({ id, name: n }) => {
+      await queryClient.cancelQueries({ queryKey: ['shopping-list-items', resolvedListId] });
+      const prev = queryClient.getQueryData(['shopping-list-items', resolvedListId]);
+      queryClient.setQueryData(['shopping-list-items', resolvedListId], (old: ShoppingItem[]) =>
+        old.map((item) => (item.id === id ? { ...item, name: n } : item))
+      );
+      return { prev };
+    },
+    onError: (_, __, ctx) => {
+      queryClient.setQueryData(['shopping-list-items', resolvedListId], ctx?.prev);
     },
   });
 
@@ -196,57 +266,24 @@ export default function ShoppingListScreen() {
     if (!name.trim() || !resolvedListId) return;
     addMutation.mutate({
       name: name.trim(),
-      quantity: quantity ? parseFloat(quantity) : null,
+      quantity: quantity || null,
       unit: unit || null,
     });
   }
 
-  function handleMenuPress() {
-    if (!activeList) return;
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: [
-            t('common.cancel'),
-            t('shopping.renameList'),
-            t('shopping.invite'),
-            t('shopping.deleteList'),
-          ],
-          destructiveButtonIndex: 3,
-          cancelButtonIndex: 0,
-        },
-        (idx) => {
-          if (idx === 1) { setRenameName(activeList.name); setRenameOpen(true); }
-          else if (idx === 2) handleInvite();
-          else if (idx === 3) handleDeleteList();
-        }
-      );
-    } else {
-      Alert.alert(activeList.name, undefined, [
-        { text: t('shopping.renameList'), onPress: () => { setRenameName(activeList.name); setRenameOpen(true); } },
-        { text: t('shopping.invite'), onPress: handleInvite },
-        { text: t('shopping.deleteList'), style: 'destructive', onPress: handleDeleteList },
-        { text: t('common.cancel'), style: 'cancel' },
-      ]);
-    }
-  }
-
   async function handleInvite() {
     if (!resolvedListId) return;
+    setMenuOpen(false);
     try {
       const { url } = await apiFetch<{ url: string }>(`/api/shopping-lists/${resolvedListId}/invite`, getToken);
-      if (Platform.OS === 'ios') {
-        const { Share } = require('react-native');
-        Share.share({ url });
-      } else {
-        Alert.alert('Kutsu', url);
-      }
+      await Share.share({ url });
     } catch {
       Alert.alert(t('common.error'));
     }
   }
 
   function handleDeleteList() {
+    setMenuOpen(false);
     Alert.alert(t('shopping.deleteList'), t('shopping.deleteConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('shopping.deleteList'), style: 'destructive', onPress: () => deleteListMutation.mutate() },
@@ -281,9 +318,11 @@ export default function ShoppingListScreen() {
           <Text className="text-2xl font-bold text-foreground">{activeList?.name ?? t('shopping.title')}</Text>
           <Text className="text-muted-foreground text-lg">▾</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleMenuPress} className="p-2">
-          <Text className="text-2xl text-muted-foreground">⋯</Text>
-        </TouchableOpacity>
+        {activeList && (
+          <TouchableOpacity onPress={() => setMenuOpen(true)} className="p-2">
+            <Text className="text-2xl text-muted-foreground">⋯</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
@@ -317,7 +356,6 @@ export default function ShoppingListScreen() {
               className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-foreground"
               placeholder={t('shopping.qtyPlaceholder')}
               placeholderTextColor="#8a7a68"
-              keyboardType="numeric"
               value={quantity}
               onChangeText={setQuantity}
             />
@@ -348,6 +386,7 @@ export default function ShoppingListScreen() {
                     showDivider={i < unchecked.length - 1}
                     onToggle={() => toggleMutation.mutate({ id: item.id, checked: !item.checked })}
                     onDelete={() => deleteMutation.mutate(item.id)}
+                    onUpdate={(n) => updateItemMutation.mutate({ id: item.id, name: n })}
                   />
                 ))}
               </View>
@@ -371,6 +410,7 @@ export default function ShoppingListScreen() {
                       showDivider={i < checked.length - 1}
                       onToggle={() => toggleMutation.mutate({ id: item.id, checked: !item.checked })}
                       onDelete={() => deleteMutation.mutate(item.id)}
+                      onUpdate={(n) => updateItemMutation.mutate({ id: item.id, name: n })}
                     />
                   ))}
                 </View>
@@ -379,6 +419,36 @@ export default function ShoppingListScreen() {
           </>
         )}
       </ScrollView>
+
+      {/* Dropdown menu */}
+      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
+        <Pressable className="flex-1" onPress={() => setMenuOpen(false)}>
+          <View
+            style={{ position: 'absolute', top: 108, right: 12, minWidth: 180,
+              shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 }}
+            className="bg-background border border-border rounded-2xl overflow-hidden"
+          >
+            <TouchableOpacity
+              onPress={() => { setMenuOpen(false); setRenameName(activeList?.name ?? ''); setRenameOpen(true); }}
+              className="px-4 py-3.5 border-b border-border active:bg-muted/50"
+            >
+              <Text className="text-foreground text-base">{t('shopping.renameList')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleInvite}
+              className="px-4 py-3.5 border-b border-border active:bg-muted/50"
+            >
+              <Text className="text-foreground text-base">{t('shopping.invite')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDeleteList}
+              className="px-4 py-3.5 active:bg-muted/50"
+            >
+              <Text className="text-destructive text-base">{t('shopping.deleteList')}</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* List picker modal */}
       <Modal visible={listPickerOpen} transparent animationType="slide" onRequestClose={() => setListPickerOpen(false)}>
@@ -468,38 +538,56 @@ function ShoppingItemRow({
   showDivider,
   onToggle,
   onDelete,
+  onUpdate,
 }: {
   item: ShoppingItem;
   showDivider: boolean;
   onToggle: () => void;
   onDelete: () => void;
+  onUpdate: (name: string) => void;
 }) {
+  const [editName, setEditName] = useState(item.name);
+
+  function handleBlur() {
+    const trimmed = editName.trim();
+    if (!trimmed) {
+      setEditName(item.name);
+      return;
+    }
+    if (trimmed !== item.name) {
+      onUpdate(trimmed);
+    }
+  }
+
   return (
-    <View className={`${showDivider ? 'border-b border-border' : ''}`}>
-      <Pressable
-        onPress={onToggle}
-        className="flex-row items-center px-4 py-3 gap-3 active:opacity-75"
-      >
+    <View className={`flex-row items-center px-4 py-2.5 gap-3 ${showDivider ? 'border-b border-border' : ''}`}>
+      <Pressable onPress={onToggle} hitSlop={8} className="active:opacity-75 shrink-0">
         <View
-          className={`w-5 h-5 rounded-full border-2 items-center justify-center ${item.checked ? 'bg-primary border-primary' : 'border-border'
-            }`}
+          className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+            item.checked ? 'bg-primary border-primary' : 'border-border'
+          }`}
         >
           {item.checked && <Text className="text-white text-xs font-bold">✓</Text>}
         </View>
-        <Text
-          className={`flex-1 text-base text-foreground ${item.checked ? 'line-through' : ''}`}
-        >
-          {item.name}
-        </Text>
-        {(item.quantity != null || item.unit) && (
-          <Text className="text-sm text-muted-foreground">
-            {[item.quantity?.toString(), item.unit].filter(Boolean).join(' ')}
-          </Text>
-        )}
-        <TouchableOpacity onPress={onDelete} hitSlop={8}>
-          <Text className="text-muted-foreground text-lg px-1">×</Text>
-        </TouchableOpacity>
       </Pressable>
+      <TextInput
+        className={`flex-1 text-base text-foreground py-0.5 ${item.checked ? 'line-through opacity-50' : ''}`}
+        value={editName}
+        onChangeText={setEditName}
+        onBlur={handleBlur}
+        editable={!item.id.startsWith('temp-')}
+        multiline={false}
+        returnKeyType="done"
+        blurOnSubmit
+      />
+      {(item.quantity != null || item.unit) && (
+        <Text className="text-sm text-muted-foreground shrink-0">
+          {[item.quantity, item.unit].filter(Boolean).join(' ')}
+        </Text>
+      )}
+      <TouchableOpacity onPress={onDelete} hitSlop={8} className="shrink-0">
+        <Text className="text-muted-foreground text-lg px-1">×</Text>
+      </TouchableOpacity>
     </View>
   );
 }

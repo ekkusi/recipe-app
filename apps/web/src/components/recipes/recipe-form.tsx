@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -32,7 +32,8 @@ interface RecipeFormProps {
   submitLabel?: string;
 }
 
-const emptyIngredient = () => ({ name: "", quantity: "", unit: "" });
+const emptyIngredient = () => ({ name: "", quantity: "", unit: "", is_section_header: false });
+const emptySubtitle = () => ({ name: "", quantity: "", unit: "", is_section_header: true });
 
 
 export function RecipeForm({
@@ -84,6 +85,7 @@ export function RecipeForm({
     fields: instructionFields,
     append: appendInstruction,
     remove: removeInstruction,
+    swap: swapInstruction,
   } = useFieldArray({ control, name: "instructions" });
 
   const tag_ids = watch("tag_ids");
@@ -231,19 +233,33 @@ export function RecipeForm({
         {errors.ingredients?.root && (
           <p className="text-sm text-destructive">{errors.ingredients.root.message}</p>
         )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="rounded-xl self-start"
-          onClick={() => {
-            setAutoFocusIngredientIndex(ingredientFields.length);
-            appendIngredient(emptyIngredient());
-          }}
-        >
-          <Plus size={14} />
-          {t('form.addIngredient')}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-xl"
+            onClick={() => {
+              setAutoFocusIngredientIndex(ingredientFields.length);
+              appendIngredient(emptyIngredient());
+            }}
+          >
+            <Plus size={14} />
+            {t('form.addIngredient')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-xl"
+            onClick={() => {
+              setAutoFocusIngredientIndex(ingredientFields.length);
+              appendIngredient(emptySubtitle());
+            }}
+          >
+            {t('form.addSubtitle')}
+          </Button>
+        </div>
       </div>
 
       {/* Instructions */}
@@ -261,6 +277,28 @@ export function RecipeForm({
                 className="flex-1 rounded-xl resize-none"
                 rows={2}
               />
+              <div className="flex flex-col gap-0.5 mt-1 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => swapInstruction(i, i - 1)}
+                  disabled={i === 0}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-25"
+                >
+                  <ChevronUp size={14} />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => swapInstruction(i, i + 1)}
+                  disabled={i === instructionFields.length - 1}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-25"
+                >
+                  <ChevronDown size={14} />
+                </Button>
+              </div>
               <Button
                 type="button"
                 variant="ghost"

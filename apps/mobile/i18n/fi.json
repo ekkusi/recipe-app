@@ -70,8 +70,12 @@
     "form_ingredient": "Ainesosa",
     "form_qty": "Määrä",
     "form_addIngredient": "+ Lisää ainesosa",
+    "form_addSectionHeader": "+ Lisää väliotsikko",
+    "form_subtitlePlaceholder": "Väliotsikko",
     "form_stepPlaceholder": "Vaihe {{step}}…",
-    "form_addStep": "+ Lisää vaihe"
+    "form_addStep": "+ Lisää vaihe",
+    "selectIngredients": "Valitse ainesosat",
+    "addSelected": "Lisää valitut"
   },
   "shopping": {
     "title": "Ostoslista",

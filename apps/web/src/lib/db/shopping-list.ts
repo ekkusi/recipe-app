@@ -148,6 +148,22 @@ export async function toggleShoppingItem(id: string, checked: boolean, listId: s
   if (error) throw error;
 }
 
+export async function updateShoppingItem(
+  id: string,
+  data: { name?: string; quantity?: string | null; unit?: string | null },
+  listId: string,
+  userId: string,
+) {
+  const supabase = createServiceClient();
+  await assertMember(supabase, listId, userId);
+  const { error } = await supabase
+    .from("shopping_list_items")
+    .update(data)
+    .eq("id", id)
+    .eq("list_id", listId);
+  if (error) throw error;
+}
+
 export async function deleteShoppingItem(id: string, listId: string, userId: string) {
   const supabase = createServiceClient();
   await assertMember(supabase, listId, userId);

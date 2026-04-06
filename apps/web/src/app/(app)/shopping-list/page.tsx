@@ -138,7 +138,7 @@ function ShoppingListContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          quantity: quantity ? parseFloat(quantity) : null,
+          quantity: quantity || null,
           unit: unit || null,
         }),
       });

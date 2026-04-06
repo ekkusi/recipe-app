@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   await addShoppingItems(
     resolvedListId,
     userId,
-    ingredients.map((ing: { name: string; quantity: number | null; unit: string | null }) => ({
+    ingredients.map((ing: { name: string; quantity: string | null; unit: string | null }) => ({
       name: ing.name,
       quantity: ing.quantity ?? null,
       unit: ing.unit ?? null,

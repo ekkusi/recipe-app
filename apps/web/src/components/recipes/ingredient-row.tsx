@@ -16,6 +16,7 @@ export type IngredientRowValue = {
   name: string;
   quantity: string;
   unit: string;
+  is_section_header: boolean;
 };
 
 interface IngredientRowProps {
@@ -26,6 +27,29 @@ interface IngredientRowProps {
 }
 
 export function IngredientRow({ value, onChange, onRemove, autoFocus }: IngredientRowProps) {
+  if (value.is_section_header) {
+    return (
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Väliotsikko"
+          value={value.name}
+          onChange={(e) => onChange({ ...value, name: e.target.value })}
+          className="flex-1 rounded-xl font-bold"
+          autoFocus={autoFocus}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="text-muted-foreground hover:text-destructive shrink-0"
+        >
+          <Trash2 size={16} />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2">
       <Input
@@ -37,9 +61,8 @@ export function IngredientRow({ value, onChange, onRemove, autoFocus }: Ingredie
       />
       <Input
         placeholder="Qty"
-        type="number"
-        min="0"
-        step="any"
+        type="text"
+        inputMode="decimal"
         value={value.quantity}
         onChange={(e) => onChange({ ...value, quantity: e.target.value })}
         className="w-20 rounded-xl text-center"

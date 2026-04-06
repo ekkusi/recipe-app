@@ -34,6 +34,8 @@ export default function RecipeDetailScreen() {
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<Set<string>>(new Set());
   const [newCollectionName, setNewCollectionName] = useState('');
   const [shoppingAdded, setShoppingAdded] = useState(false);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [selectedIngredientIndices, setSelectedIngredientIndices] = useState<Set<number>>(new Set());
 
   const { data: recipe, isLoading, error, refetch } = useQuery({
     queryKey: ['recipe', id],
@@ -93,7 +95,7 @@ export default function RecipeDetailScreen() {
   }
 
   const addToShoppingMutation = useMutation({
-    mutationFn: async (ingredients: { name: string; quantity: number | null; unit: string | null }[]) => {
+    mutationFn: async (ingredients: { name: string; quantity: string | null; unit: string | null }[]) => {
       const listId = await getActiveListId();
       return apiFetch('/api/shopping-list/bulk', getToken, {
         method: 'POST',
@@ -131,14 +133,27 @@ export default function RecipeDetailScreen() {
     (a, b) => a.step_number - b.step_number
   );
 
-  function handleAddToShoppingList() {
-    addToShoppingMutation.mutate(
-      ingredients.map((ing) => ({
-        name: ing.name,
-        quantity: ing.quantity,
-        unit: ing.unit,
-      }))
-    );
+  const nonHeaderIngredients = ingredients.filter((ing) => !ing.is_section_header);
+
+  function openBulkModal() {
+    setSelectedIngredientIndices(new Set(nonHeaderIngredients.map((_, i) => i)));
+    setBulkModalOpen(true);
+  }
+
+  function toggleIngredientSelection(i: number) {
+    setSelectedIngredientIndices((prev) => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+
+  function confirmBulkAdd() {
+    const selected = nonHeaderIngredients
+      .filter((_, i) => selectedIngredientIndices.has(i))
+      .map((ing) => ({ name: ing.name, quantity: ing.quantity ?? null, unit: ing.unit ?? null }));
+    addToShoppingMutation.mutate(selected);
+    setBulkModalOpen(false);
   }
 
   return (
@@ -233,8 +248,8 @@ export default function RecipeDetailScreen() {
             <View className="flex-row items-center justify-between mb-3">
               <Text className="text-lg font-bold text-foreground">{t('recipes.ingredients')}</Text>
               <TouchableOpacity
-                onPress={handleAddToShoppingList}
-                disabled={addToShoppingMutation.isPending || shoppingAdded}
+                onPress={openBulkModal}
+                disabled={addToShoppingMutation.isPending || shoppingAdded || nonHeaderIngredients.length === 0}
                 className="flex-row items-center gap-1.5 border border-border rounded-xl px-3 py-1.5 active:opacity-75"
                 style={{ opacity: addToShoppingMutation.isPending ? 0.5 : 1 }}
               >
@@ -253,20 +268,38 @@ export default function RecipeDetailScreen() {
               </TouchableOpacity>
             </View>
             <View className="bg-card border border-border rounded-2xl overflow-hidden">
-              {ingredients.map((ing, i) => (
-                <View
-                  key={ing.id ?? i}
-                  className={`flex-row items-center justify-between px-4 py-3 ${i < ingredients.length - 1 ? 'border-b border-border' : ''
-                    }`}
-                >
-                  <Text className="font-medium text-foreground">{ing.name}</Text>
-                  {(ing.quantity != null || ing.unit) && (
-                    <Text className="text-sm text-muted-foreground">
-                      {[ing.quantity?.toString(), ing.unit].filter(Boolean).join(' ')}
-                    </Text>
-                  )}
-                </View>
-              ))}
+              {ingredients.map((ing, i) => {
+                if (ing.is_section_header) {
+                  return (
+                    <View
+                      key={ing.id ?? i}
+                      className={`px-4 py-2 bg-muted/40 ${i < ingredients.length - 1 ? 'border-b border-border' : ''}`}
+                    >
+                      <Text className="text-sm font-bold text-foreground">{ing.name}</Text>
+                    </View>
+                  );
+                }
+                return (
+                  <View
+                    key={ing.id ?? i}
+                    className={`flex-row items-center justify-between px-4 py-3 ${i < ingredients.length - 1 ? 'border-b border-border' : ''}`}
+                  >
+                    <Text className="font-medium text-foreground flex-1">{ing.name}</Text>
+                    {(ing.quantity != null || ing.unit) && (
+                      <Text className="text-sm text-muted-foreground mr-2">
+                        {[ing.quantity, ing.unit].filter(Boolean).join(' ')}
+                      </Text>
+                    )}
+                    <TouchableOpacity
+                      onPress={() => addToShoppingMutation.mutate([{ name: ing.name, quantity: ing.quantity ?? null, unit: ing.unit ?? null }])}
+                      hitSlop={8}
+                      className="active:opacity-75"
+                    >
+                      <Ionicons name="cart-outline" size={18} color="#8a7a68" />
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
             </View>
           </View>
         )}
@@ -290,6 +323,61 @@ export default function RecipeDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Bulk add modal */}
+      <Modal
+        visible={bulkModalOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setBulkModalOpen(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/40 justify-end"
+          onPress={() => setBulkModalOpen(false)}
+        >
+          <Pressable>
+            <View className="bg-background rounded-t-3xl p-6 pb-10">
+              <Text className="font-bold text-lg mb-4 text-foreground">
+                {t('recipes.selectIngredients')}
+              </Text>
+              <ScrollView style={{ maxHeight: 320 }}>
+                {nonHeaderIngredients.map((ing, i) => {
+                  const selected = selectedIngredientIndices.has(i);
+                  return (
+                    <TouchableOpacity
+                      key={ing.id ?? i}
+                      onPress={() => toggleIngredientSelection(i)}
+                      className="flex-row items-center justify-between py-3 border-b border-border"
+                    >
+                      <Text className="flex-1 text-base text-foreground">{ing.name}</Text>
+                      {(ing.quantity != null || ing.unit) && (
+                        <Text className="text-sm text-muted-foreground mr-3">
+                          {[ing.quantity, ing.unit].filter(Boolean).join(' ')}
+                        </Text>
+                      )}
+                      <View
+                        className={`w-5 h-5 rounded border-2 items-center justify-center ${selected ? 'bg-primary border-primary' : 'border-border'}`}
+                      >
+                        {selected && <Text className="text-white text-xs font-bold">✓</Text>}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+              <TouchableOpacity
+                onPress={confirmBulkAdd}
+                disabled={selectedIngredientIndices.size === 0}
+                className="mt-4 bg-primary rounded-2xl py-4 items-center active:opacity-75"
+                style={{ opacity: selectedIngredientIndices.size === 0 ? 0.5 : 1 }}
+              >
+                <Text className="text-primary-foreground font-semibold">
+                  {t('recipes.addSelected')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Collections bottom sheet */}
       <Modal

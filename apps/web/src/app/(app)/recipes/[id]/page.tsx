@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/layout/header";
 import { getRecipeById } from "@/lib/db/recipes";
-import { AddToShoppingListButton } from "@/components/recipes/add-to-shopping-list-button";
+import { IngredientList } from "@/components/recipes/ingredient-list";
 import { ShareRecipeButton } from "@/components/recipes/share-recipe-button";
 import { CopyRecipeButton } from "@/components/recipes/copy-recipe-button";
 import { AddToCollectionButton } from "@/components/recipes/add-to-collection-button";
@@ -114,27 +114,7 @@ export default async function RecipePage({
 
         {/* Ingredients */}
         {ingredients.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold">{t('ingredients')}</h2>
-              <AddToShoppingListButton ingredients={ingredients} />
-            </div>
-            <div className="bg-white rounded-3xl border border-border divide-y divide-border overflow-hidden">
-              {ingredients.map((ing) => (
-                <div
-                  key={ing.id}
-                  className="flex items-center justify-between px-4 py-3"
-                >
-                  <span className="font-medium">{ing.name}</span>
-                  {(ing.quantity || ing.unit) && (
-                    <span className="text-muted-foreground text-sm">
-                      {ing.quantity} {ing.unit}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <IngredientList ingredients={ingredients} />
         )}
 
         {/* Instructions */}

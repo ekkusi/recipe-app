@@ -4,10 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Tag } from '@recipe-app/shared';
 import { recipeFormSchema, type RecipeFormSchema } from '@recipe-app/shared';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { UnitPicker } from '../ui/UnitPicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SortableInstructionList } from './SortableInstructionList';
 
 interface RecipeFormProps {
   initialValues?: Partial<RecipeFormSchema>;
@@ -18,7 +19,8 @@ interface RecipeFormProps {
 }
 
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
-const emptyIngredient = () => ({ name: '', quantity: '', unit: '' });
+const emptyIngredient = () => ({ name: '', quantity: '', unit: '', is_section_header: false });
+const emptySubtitle = () => ({ name: '', quantity: '', unit: '', is_section_header: true });
 
 export function RecipeForm({
   initialValues,
@@ -65,6 +67,7 @@ export function RecipeForm({
     fields: instructionFields,
     append: appendInstruction,
     remove: removeInstruction,
+    move: moveInstruction,
   } = useFieldArray({ control, name: 'instructions' });
 
   const difficulty = watch('difficulty');
@@ -206,37 +209,55 @@ export function RecipeForm({
               key={field.id}
               control={control}
               name={`ingredients.${i}`}
-              render={({ field: f }) => (
-                <View className="flex-row gap-2 items-center">
-                  <TextInput
-                    ref={(r) => { ingredientNameRefs.current[i] = r; }}
-                    className="flex-1 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
-                    placeholder={t('recipes.form_ingredient')}
-                    placeholderTextColor="#8a7a68"
-                    value={f.value.name}
-                    onChangeText={(v) => f.onChange({ ...f.value, name: v })}
-                  />
-                  <TextInput
-                    className="w-16 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
-                    placeholder={t('recipes.form_qty')}
-                    placeholderTextColor="#8a7a68"
-                    keyboardType="numeric"
-                    value={f.value.quantity}
-                    onChangeText={(v) => f.onChange({ ...f.value, quantity: v })}
-                  />
-                  <View className="w-16">
-                    <UnitPicker
-                      value={f.value.unit}
-                      onChange={(v) => f.onChange({ ...f.value, unit: v })}
+              render={({ field: f }) => {
+                if (f.value.is_section_header) {
+                  return (
+                    <View className="flex-row gap-2 items-center">
+                      <TextInput
+                        className="flex-1 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm font-bold"
+                        placeholder={t('recipes.form_subtitlePlaceholder')}
+                        placeholderTextColor="#8a7a68"
+                        value={f.value.name}
+                        onChangeText={(v) => f.onChange({ ...f.value, name: v })}
+                      />
+                      <TouchableOpacity onPress={() => removeIngredient(i)} hitSlop={8}>
+                        <Text className="text-muted-foreground text-xl px-1">×</Text>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                }
+                return (
+                  <View className="flex-row gap-2 items-center">
+                    <TextInput
+                      ref={(r) => { ingredientNameRefs.current[i] = r; }}
+                      className="flex-1 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
+                      placeholder={t('recipes.form_ingredient')}
+                      placeholderTextColor="#8a7a68"
+                      value={f.value.name}
+                      onChangeText={(v) => f.onChange({ ...f.value, name: v })}
                     />
+                    <TextInput
+                      className="w-16 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
+                      placeholder={t('recipes.form_qty')}
+                      placeholderTextColor="#8a7a68"
+                      keyboardType="default"
+                      value={f.value.quantity}
+                      onChangeText={(v) => f.onChange({ ...f.value, quantity: v })}
+                    />
+                    <View className="w-16">
+                      <UnitPicker
+                        value={f.value.unit}
+                        onChange={(v) => f.onChange({ ...f.value, unit: v })}
+                      />
+                    </View>
+                    {ingredientFields.length > 1 && (
+                      <TouchableOpacity onPress={() => removeIngredient(i)} hitSlop={8}>
+                        <Text className="text-muted-foreground text-xl px-1">×</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
-                  {ingredientFields.length > 1 && (
-                    <TouchableOpacity onPress={() => removeIngredient(i)} hitSlop={8}>
-                      <Text className="text-muted-foreground text-xl px-1">×</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
+                );
+              }}
             />
           ))}
         </View>
@@ -250,77 +271,34 @@ export function RecipeForm({
             </Text>
           )
         ))}
-        <TouchableOpacity
-          onPress={() => {
-            const newIndex = ingredientFields.length;
-            appendIngredient(emptyIngredient());
-            setTimeout(() => ingredientNameRefs.current[newIndex]?.focus(), 50);
-          }}
-          className="mt-2 self-start"
-        >
-          <Text className="text-primary text-sm font-semibold">{t('recipes.form_addIngredient')}</Text>
-        </TouchableOpacity>
+        <View className="flex-row gap-3 mt-2">
+          <TouchableOpacity
+            onPress={() => {
+              const newIndex = ingredientFields.length;
+              appendIngredient(emptyIngredient());
+              setTimeout(() => ingredientNameRefs.current[newIndex]?.focus(), 50);
+            }}
+          >
+            <Text className="text-primary text-sm font-semibold">{t('recipes.form_addIngredient')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => appendIngredient(emptySubtitle())}
+          >
+            <Text className="text-primary text-sm font-semibold">{t('recipes.form_addSectionHeader')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Instructions */}
-      <View className="mb-6">
-        <Text className="text-sm font-semibold text-foreground mb-1.5">{t('recipes.instructions')} *</Text>
-        <View className="gap-2">
-          {instructionFields.map((field, i) => (
-            <Controller
-              key={field.id}
-              control={control}
-              name={`instructions.${i}.content`}
-              render={({ field: f }) => (
-                <View className="flex-row gap-2 items-start">
-                  <Text className="text-sm font-bold text-muted-foreground mt-3 w-5 text-right">
-                    {i + 1}.
-                  </Text>
-                  <TextInput
-                    ref={(r) => { instructionRefs.current[i] = r; }}
-                    className="flex-1 bg-input border border-border rounded-xl px-3 py-2.5 text-foreground text-sm"
-                    placeholder={t('recipes.form_stepPlaceholder', { step: i + 1 })}
-                    placeholderTextColor="#8a7a68"
-                    multiline
-                    style={{ textAlignVertical: 'top', minHeight: 64 }}
-                    value={f.value}
-                    onChangeText={f.onChange}
-                  />
-                  {instructionFields.length > 1 && (
-                    <TouchableOpacity
-                      onPress={() => removeInstruction(i)}
-                      hitSlop={8}
-                      className="mt-2"
-                    >
-                      <Text className="text-muted-foreground text-xl px-1">×</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
-            />
-          ))}
-        </View>
-        {errors.instructions?.root && (
-          <Text className="text-destructive text-sm mt-1">{errors.instructions.root.message}</Text>
-        )}
-        {errors.instructions && !errors.instructions.root && instructionFields.map((_, i) => (
-          errors.instructions?.[i]?.content && (
-            <Text key={i} className="text-destructive text-sm mt-1">
-              {t('recipes.form_stepPlaceholder', { step: i + 1 })}: {errors.instructions[i]?.content?.message}
-            </Text>
-          )
-        ))}
-        <TouchableOpacity
-          onPress={() => {
-            const newIndex = instructionFields.length;
-            appendInstruction({ content: '' });
-            setTimeout(() => instructionRefs.current[newIndex]?.focus(), 50);
-          }}
-          className="mt-2 self-start"
-        >
-          <Text className="text-primary text-sm font-semibold">{t('recipes.form_addStep')}</Text>
-        </TouchableOpacity>
-      </View>
+      <SortableInstructionList
+        fields={instructionFields}
+        control={control}
+        errors={errors}
+        instructionRefs={instructionRefs}
+        onMove={moveInstruction}
+        onRemove={removeInstruction}
+        onAppend={() => appendInstruction({ content: '' })}
+      />
 
       {/* Privacy */}
       <Controller

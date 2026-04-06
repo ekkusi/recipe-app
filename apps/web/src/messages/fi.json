@@ -55,9 +55,13 @@
       "ingredient": "Ainesosa",
       "qty": "Määrä",
       "addIngredient": "Lisää ainesosa",
+      "addSubtitle": "Lisää väliotsikko",
+      "subtitlePlaceholder": "Väliotsikko",
       "stepPlaceholder": "Vaihe {step}…",
       "addStep": "Lisää vaihe"
-    }
+    },
+    "selectIngredients": "Valitse ainesosat",
+    "addSelected": "Lisää valitut"
   },
   "shopping": {
     "title": "Ostoslista",

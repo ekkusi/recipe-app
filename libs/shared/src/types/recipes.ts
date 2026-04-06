@@ -3,9 +3,10 @@ export type Difficulty = "easy" | "medium" | "hard";
 export type Ingredient = {
   id?: string;
   name: string;
-  quantity: number | null;
+  quantity: string | null;
   unit: string | null;
   sort_order: number;
+  is_section_header: boolean;
 };
 
 export type Instruction = {

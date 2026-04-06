@@ -29,10 +29,11 @@ export default function EditRecipePage() {
         time_minutes: recipe.time_minutes?.toString() ?? "",
         ingredients: (recipe.recipe_ingredients ?? [])
           .sort((a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order)
-          .map((ing: { name: string; quantity: number | null; unit: string | null }) => ({
+          .map((ing: { name: string; quantity: string | null; unit: string | null; is_section_header: boolean }) => ({
             name: ing.name,
-            quantity: ing.quantity?.toString() ?? "",
+            quantity: ing.quantity ?? "",
             unit: ing.unit ?? "",
+            is_section_header: ing.is_section_header ?? false,
           })),
         instructions: (recipe.recipe_instructions ?? [])
           .sort((a: { step_number: number }, b: { step_number: number }) => a.step_number - b.step_number)

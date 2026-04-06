@@ -4,6 +4,7 @@ export const ingredientRowSchema = z.object({
   name: z.string().min(1, 'Kenttä on pakollinen'),
   quantity: z.string(),
   unit: z.string(),
+  is_section_header: z.boolean(),
 });
 
 export const recipeFormSchema = z.object({

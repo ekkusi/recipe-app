@@ -31,11 +31,12 @@ export async function PUT(
   const body = await req.json();
   const ingredients = (body.ingredients ?? [])
     .filter((ing: { name: string }) => ing.name.trim())
-    .map((ing: { name: string; quantity: string; unit: string }, i: number) => ({
+    .map((ing: { name: string; quantity: string; unit: string; is_section_header?: boolean }, i: number) => ({
       name: ing.name.trim(),
-      quantity: ing.quantity ? parseFloat(ing.quantity) : null,
+      quantity: ing.quantity || null,
       unit: ing.unit || null,
       sort_order: i,
+      is_section_header: ing.is_section_header ?? false,
     }));
 
   const instructions = (body.instructions ?? [])

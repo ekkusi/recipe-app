@@ -22,7 +22,7 @@ export async function getRecipeById(id: string) {
     .from("recipes")
     .select(`
       id, user_id, title, description, difficulty, time_minutes, is_private, created_at,
-      recipe_ingredients ( id, name, quantity, unit, sort_order ),
+      recipe_ingredients ( id, name, quantity, unit, sort_order, is_section_header ),
       recipe_instructions ( id, step_number, content ),
       recipe_tags ( tag_id, tags ( id, name ) )
     `)
@@ -67,6 +67,7 @@ export async function copyRecipe(sourceId: string, newUserId: string) {
         quantity: ing.quantity,
         unit: ing.unit,
         sort_order: ing.sort_order,
+        is_section_header: ing.is_section_header,
       }))
     ),
     source.recipe_instructions.length > 0 &&

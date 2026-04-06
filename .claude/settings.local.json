@@ -30,7 +30,12 @@
       "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/join/[token])",
       "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/collections/[id])",
       "Bash(mkdir -p /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/shared-lists/[id])",
-      "WebFetch(domain:supabase.com)"
+      "WebFetch(domain:supabase.com)",
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app -name *.sql)",
+      "WebFetch(domain:react-native-sortables-docs.vercel.app)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/node_modules/react-native-sortables -name index.*)"
     ]
   }
 }
