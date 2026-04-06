@@ -10,6 +10,8 @@ export const UNITS = [
   { value: "oz", label: "oz" },
   { value: "lb", label: "lb" },
   { value: "piece", label: "kpl" },
+  { value: "jar", label: "prk" },
+  { value: "cm", label: "cm" }
 ] as const;
 
 export type Unit = (typeof UNITS)[number]["value"];
