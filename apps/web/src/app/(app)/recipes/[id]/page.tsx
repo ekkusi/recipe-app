@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Pencil, Clock, ChefHat } from "lucide-react";
+import { Pencil, Clock, ChefHat, Lock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/layout/header";
 import { getRecipeById } from "@/lib/db/recipes";
 import { AddToShoppingListButton } from "@/components/recipes/add-to-shopping-list-button";
-import { PrivacyToggle } from "@/components/recipes/privacy-toggle";
 import { ShareRecipeButton } from "@/components/recipes/share-recipe-button";
 import { CopyRecipeButton } from "@/components/recipes/copy-recipe-button";
 import { AddToCollectionButton } from "@/components/recipes/add-to-collection-button";
@@ -22,6 +21,7 @@ export default async function RecipePage({
   const { id } = await params;
   const { userId } = await auth();
   const t = await getTranslations('recipes');
+  const tPrivacy = await getTranslations('privacy');
 
   let recipe;
   try {
@@ -65,10 +65,9 @@ export default async function RecipePage({
       />
 
       <div className="py-4 flex flex-col gap-6">
-        {/* Owner actions: privacy + share */}
+        {/* Owner actions: share + collection */}
         {isOwner && (
           <div className="flex flex-wrap gap-2">
-            <PrivacyToggle recipeId={id} initialIsPrivate={recipe.is_private} />
             <ShareRecipeButton recipeId={id} isPrivate={recipe.is_private} />
             <AddToCollectionButton recipeId={id} />
           </div>
@@ -81,6 +80,12 @@ export default async function RecipePage({
         )}
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-2">
+          {recipe.is_private && (
+            <Badge variant="outline" className="rounded-full gap-1 text-muted-foreground">
+              <Lock size={11} />
+              {tPrivacy('private')}
+            </Badge>
+          )}
           {recipe.difficulty && (
             <Badge variant="outline" className="rounded-full capitalize">
               <ChefHat size={12} className="mr-1" />

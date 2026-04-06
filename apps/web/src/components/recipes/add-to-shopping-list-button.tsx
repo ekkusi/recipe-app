@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ShoppingCart, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { getActiveListId } from "@/lib/active-shopping-list";
 
 type Ingredient = {
   name: string;
@@ -25,7 +26,7 @@ export function AddToShoppingListButton({
       await fetch("/api/shopping-list/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingredients }),
+        body: JSON.stringify({ ingredients, listId: getActiveListId() }),
       });
       setState("done");
       setTimeout(() => setState("idle"), 2000);

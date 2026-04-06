@@ -16,6 +16,7 @@ import {
 import { ShoppingItem } from "@/components/shopping-list/shopping-item";
 import { UNITS } from "@/lib/units";
 import { getSupabaseBrowserClient } from "@/lib/supabase-client";
+import { getActiveListId, setActiveListId } from "@/lib/active-shopping-list";
 import type { ShoppingList, ShoppingItem as ShoppingItemType } from "@recipe-app/shared";
 
 export default function ShoppingListPage() {
@@ -24,7 +25,14 @@ export default function ShoppingListPage() {
   const router = useRouter();
 
   const [lists, setLists] = useState<ShoppingList[]>([]);
-  const [activeListId, setActiveListId] = useState<string | null>(searchParams.get("list"));
+  const [activeListId, setActiveListIdState] = useState<string | null>(
+    searchParams.get("list") ?? getActiveListId()
+  );
+
+  function switchList(id: string) {
+    setActiveListIdState(id);
+    setActiveListId(id);
+  }
   const [items, setItems] = useState<ShoppingItemType[]>([]);
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -45,7 +53,7 @@ export default function ShoppingListPage() {
       .then((r) => r.json())
       .then((data: ShoppingList[]) => {
         setLists(data);
-        if (!activeListId && data.length > 0) setActiveListId(data[0].id);
+        if (!activeListId && data.length > 0) switchList(data[0].id);
       });
   }, []);
 
@@ -108,7 +116,7 @@ export default function ShoppingListPage() {
       setNewListOpen(true);
       return;
     }
-    setActiveListId(value);
+    switchList(value);
     router.replace(`/shopping-list?list=${value}`);
   }
 
@@ -188,10 +196,10 @@ export default function ShoppingListPage() {
       const res = await fetch("/api/shopping-lists");
       const data: ShoppingList[] = await res.json();
       setLists(data);
-      setActiveListId(data[0]?.id ?? null);
+      if (data[0]?.id) switchList(data[0].id);
     } else {
       setLists(remaining);
-      setActiveListId(remaining[0].id);
+      switchList(remaining[0].id);
     }
     setItems([]);
   }
@@ -206,7 +214,7 @@ export default function ShoppingListPage() {
     });
     const list: ShoppingList = await res.json();
     setLists((prev) => [...prev, list]);
-    setActiveListId(list.id);
+    switchList(list.id);
     router.replace(`/shopping-list?list=${list.id}`);
     setNewListOpen(false);
     setItems([]);

@@ -20,13 +20,19 @@ import {
 import { apiFetch } from '../../../lib/api';
 import { UnitPicker } from '../../../components/ui/UnitPicker';
 import { supabase } from '../../../lib/supabase';
+import { getActiveListId, setActiveListId as persistActiveListId } from '../../../lib/active-shopping-list';
 
 export default function ShoppingListScreen() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const [activeListId, setActiveListId] = useState<string | null>(null);
+  const [activeListId, setActiveListIdState] = useState<string | null>(null);
+
+  function setActiveListId(id: string) {
+    setActiveListIdState(id);
+    persistActiveListId(id);
+  }
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
@@ -45,9 +51,17 @@ export default function ShoppingListScreen() {
   const activeList = lists.find((l) => l.id === activeListId) ?? lists[0] ?? null;
   const resolvedListId = activeList?.id ?? null;
 
-  // Set active list once loaded
+  // Restore persisted active list on mount, fall back to first list
   useEffect(() => {
-    if (!activeListId && lists.length > 0) setActiveListId(lists[0].id);
+    if (lists.length === 0) return;
+    getActiveListId().then((storedId) => {
+      const match = storedId && lists.find((l) => l.id === storedId);
+      if (match) {
+        setActiveListIdState(storedId!);
+      } else if (!activeListId) {
+        setActiveListId(lists[0].id);
+      }
+    });
   }, [lists]);
 
   // Fetch items for active list
@@ -174,7 +188,7 @@ export default function ShoppingListScreen() {
       apiFetch(`/api/shopping-lists/${resolvedListId}`, getToken, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shopping-lists'] });
-      setActiveListId(null);
+      setActiveListIdState(null);
     },
   });
 

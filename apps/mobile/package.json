@@ -8,7 +8,11 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
-    "expo-install": "expo install"
+    "expo-install": "expo install",
+    "build:dev": "eas build --profile development",
+    "build:preview": "eas build --profile preview",
+    "build:prod": "eas build --profile production",
+    "submit": "eas submit --profile production"
   },
   "dependencies": {
     "@clerk/expo": "^3.1.6",

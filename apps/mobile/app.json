@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
-    "scheme": "mobile",
+    "name": "Reseptimania",
+    "slug": "reseptimania",
+    "scheme": "reseptimania",
     "version": "1.0.0",
     "orientation": "portrait",
     "platforms": [
@@ -18,10 +18,37 @@
       "@clerk/expo"
     ],
     "ios": {
-      "bundleIdentifier": "com.ekkusi.mobile"
+      "bundleIdentifier": "com.reseptimania.twa",
+      "associatedDomains": [
+        "applinks:reseptimania.vercel.app"
+      ]
     },
     "android": {
-      "package": "com.ekkusi.mobile"
-    }
+      "package": "com.reseptimania.twa",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "reseptimania.vercel.app",
+              "pathPrefix": "/r"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4ecac7da-028f-40fa-82a9-e575dcd706d0"
+      }
+    },
+    "owner": "ekkusi"
   }
 }

@@ -313,11 +313,16 @@ export function RecipeForm({
         render={({ field }) => (
           <Pressable
             onPress={() => field.onChange(!field.value)}
-            className="flex-row items-center gap-2 self-start border border-border rounded-xl px-3 py-2.5 active:opacity-75"
+            className="flex-row items-center gap-2 self-start active:opacity-75 mb-2"
           >
-            <Text className="text-sm text-foreground">
-              {field.value ? t('privacy.private') : t('privacy.public')}
-            </Text>
+            <View
+              className={`w-5 h-5 rounded border-2 items-center justify-center ${
+                field.value ? 'bg-primary border-primary' : 'border-border bg-input'
+              }`}
+            >
+              {field.value && <Text className="text-white text-xs font-bold">✓</Text>}
+            </View>
+            <Text className="text-sm text-foreground">{t('privacy.private')}</Text>
           </Pressable>
         )}
       />

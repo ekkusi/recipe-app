@@ -50,8 +50,9 @@
     "loadOneError": "Reseptin lataaminen epäonnistui",
     "ingredients": "Ainesosat",
     "instructions": "Ohjeet",
-    "addToShopping": "+ Ostoslistalle",
+    "addToShopping": "Lisää ostoslistalle",
     "adding": "Lisätään…",
+    "added": "Lisätty!",
     "timeMinutes": "{{time}} min",
     "empty_title": "Ei reseptejä vielä",
     "empty_subtitle": "Lisää ensimmäinen resepti aloittaaksesi",
@@ -120,5 +121,5 @@
     "recipeCount": "{{count}} reseptiä",
     "empty_title": "Ei kokoelmia vielä",
     "empty_subtitle": "Lisää reseptejä kokoelmaan reseptin sivulta"
-  },
+  }
 }

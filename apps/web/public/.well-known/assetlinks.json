@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.reseptimania.twa",
+      "sha256_cert_fingerprints": [
+        "0B:05:3C:9A:57:7F:78:88:B6:34:89:98:26:2F:3F:48:49:37:46:03:05:52:8B:A4:40:90:E9:32:10:A1:0D:4F"
+      ]
+    }
+  }
+]

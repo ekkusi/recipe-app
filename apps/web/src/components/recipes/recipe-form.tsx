@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Globe, Lock } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -193,14 +193,18 @@ export function RecipeForm({
         control={control}
         name="is_private"
         render={({ field }) => (
-          <button
-            type="button"
-            onClick={() => field.onChange(!field.value)}
-            className="flex items-center gap-2 w-fit rounded-xl border border-border px-3 py-2 text-sm hover:bg-muted transition-colors"
-          >
-            {field.value ? <Lock size={14} /> : <Globe size={14} />}
-            {field.value ? tPrivacy('private') : tPrivacy('public')}
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="is_private"
+              checked={field.value}
+              onChange={(e) => field.onChange(e.target.checked)}
+              className="w-4 h-4 cursor-pointer accent-primary"
+            />
+            <Label htmlFor="is_private" className="cursor-pointer text-sm font-normal">
+              {tPrivacy('private')}
+            </Label>
+          </div>
         )}
       />
 

@@ -1,17 +1,39 @@
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '@clerk/expo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Recipe } from '@recipe-app/shared';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { apiFetch } from '../../../../lib/api';
+import { getActiveListId } from '../../../../lib/active-shopping-list';
+
+type CollectionRow = { id: string; name: string; collection_recipes: { recipe_id: string }[] };
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getToken, userId } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+
+  const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [collections, setCollections] = useState<CollectionRow[]>([]);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<Set<string>>(new Set());
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [shoppingAdded, setShoppingAdded] = useState(false);
 
   const { data: recipe, isLoading, error, refetch } = useQuery({
     queryKey: ['recipe', id],
@@ -20,13 +42,44 @@ export default function RecipeDetailScreen() {
 
   const isOwner = recipe ? recipe.user_id === userId : false;
 
-  async function handleTogglePrivacy() {
-    if (!recipe) return;
-    await apiFetch(`/api/recipes/${id}/privacy`, getToken, {
-      method: 'PATCH',
-      body: JSON.stringify({ is_private: !recipe.is_private }),
+  async function openCollections() {
+    const data = await apiFetch<CollectionRow[]>('/api/collections', getToken);
+    setCollections(data);
+    setSelectedCollectionIds(
+      new Set(data.filter((c) => c.collection_recipes.some((cr) => cr.recipe_id === id)).map((c) => c.id))
+    );
+    setCollectionsOpen(true);
+  }
+
+  async function toggleCollection(collectionId: string) {
+    const isSelected = selectedCollectionIds.has(collectionId);
+    setSelectedCollectionIds((prev) => {
+      const next = new Set(prev);
+      isSelected ? next.delete(collectionId) : next.add(collectionId);
+      return next;
     });
-    refetch();
+    if (isSelected) {
+      await apiFetch(`/api/collections/${collectionId}/recipes/${id}`, getToken, { method: 'DELETE' });
+    } else {
+      await apiFetch(`/api/collections/${collectionId}/recipes`, getToken, {
+        method: 'POST',
+        body: JSON.stringify({ recipeId: id }),
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ['collections'] });
+    queryClient.invalidateQueries({ queryKey: ['collection', collectionId] });
+  }
+
+  async function createAndAddCollection() {
+    if (!newCollectionName.trim()) return;
+    const { id: colId } = await apiFetch<{ id: string }>('/api/collections', getToken, {
+      method: 'POST',
+      body: JSON.stringify({ name: newCollectionName.trim() }),
+    });
+    const newCol: CollectionRow = { id: colId, name: newCollectionName.trim(), collection_recipes: [] };
+    setCollections((prev) => [...prev, newCol]);
+    setNewCollectionName('');
+    await toggleCollection(colId);
   }
 
   async function handleShare() {
@@ -40,13 +93,17 @@ export default function RecipeDetailScreen() {
   }
 
   const addToShoppingMutation = useMutation({
-    mutationFn: (ingredients: { name: string; quantity: number | null; unit: string | null }[]) =>
-      apiFetch('/api/shopping-list/bulk', getToken, {
+    mutationFn: async (ingredients: { name: string; quantity: number | null; unit: string | null }[]) => {
+      const listId = await getActiveListId();
+      return apiFetch('/api/shopping-list/bulk', getToken, {
         method: 'POST',
-        body: JSON.stringify({ ingredients }),
-      }),
+        body: JSON.stringify({ ingredients, listId }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shopping-list'] });
+      setShoppingAdded(true);
+      setTimeout(() => setShoppingAdded(false), 2000);
     },
   });
 
@@ -89,39 +146,41 @@ export default function RecipeDetailScreen() {
       {/* Header */}
       <View className="px-4 pt-14 pb-4 flex-row items-center justify-between">
         <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-75">
-          <Text className="text-primary text-base font-semibold">{t('common.back')}</Text>
+          <Ionicons name="chevron-back" size={28} color="#b06060" />
         </Pressable>
-        <View className="flex-row gap-2">
+        <View className="flex-row gap-1">
           {isOwner && (
             <>
               <TouchableOpacity
-                onPress={handleTogglePrivacy}
-                className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+                onPress={handleShare}
+                hitSlop={8}
+                className="p-2 active:opacity-75"
               >
-                <Text className="text-foreground text-sm font-semibold">
-                  {recipe?.is_private ? t('privacy.private') : t('privacy.public')}
-                </Text>
+                <MaterialCommunityIcons name="share-variant-outline" size={22} color="#5c4f44" />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleShare}
-                className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+                onPress={openCollections}
+                hitSlop={8}
+                className="p-2 active:opacity-75"
               >
-                <Text className="text-foreground text-sm font-semibold">{t('privacy.shareLink')}</Text>
+                <Ionicons name="folder-outline" size={22} color="#5c4f44" />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => router.push(`/(app)/recipes/${id}/edit`)}
-                className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+                hitSlop={8}
+                className="p-2 active:opacity-75"
               >
-                <Text className="text-foreground text-sm font-semibold">{t('common.edit')}</Text>
+                <MaterialCommunityIcons name="pencil-outline" size={22} color="#5c4f44" />
               </TouchableOpacity>
             </>
           )}
           {!isOwner && (
             <TouchableOpacity
               onPress={handleCopy}
-              className="bg-muted border border-border rounded-xl px-3 py-1.5 active:opacity-75"
+              hitSlop={8}
+              className="p-2 active:opacity-75"
             >
-              <Text className="text-foreground text-sm font-semibold">{t('privacy.copyToCollection')}</Text>
+              <Ionicons name="copy-outline" size={22} color="#5c4f44" />
             </TouchableOpacity>
           )}
         </View>
@@ -136,6 +195,12 @@ export default function RecipeDetailScreen() {
 
         {/* Meta badges */}
         <View className="flex-row flex-wrap gap-2 mb-4">
+          {recipe.is_private && (
+            <View className="bg-muted rounded-full px-3 py-1 flex-row items-center gap-1">
+              <Ionicons name="lock-closed-outline" size={11} color="#8a7a68" />
+              <Text className="text-xs text-muted-foreground">{t('privacy.private')}</Text>
+            </View>
+          )}
           {recipe.difficulty && (
             <View className="bg-muted rounded-full px-3 py-1">
               <Text className="text-xs text-muted-foreground">
@@ -169,12 +234,21 @@ export default function RecipeDetailScreen() {
               <Text className="text-lg font-bold text-foreground">{t('recipes.ingredients')}</Text>
               <TouchableOpacity
                 onPress={handleAddToShoppingList}
-                disabled={addToShoppingMutation.isPending}
-                className="bg-secondary rounded-xl px-3 py-1.5 active:opacity-75"
+                disabled={addToShoppingMutation.isPending || shoppingAdded}
+                className="flex-row items-center gap-1.5 border border-border rounded-xl px-3 py-1.5 active:opacity-75"
                 style={{ opacity: addToShoppingMutation.isPending ? 0.5 : 1 }}
               >
-                <Text className="text-sm font-semibold text-foreground">
-                  {addToShoppingMutation.isPending ? t('recipes.adding') : t('recipes.addToShopping')}
+                <Ionicons
+                  name={shoppingAdded ? 'checkmark' : 'cart-outline'}
+                  size={14}
+                  color={shoppingAdded ? '#22c55e' : '#5c4f44'}
+                />
+                <Text className={`text-sm font-semibold ${shoppingAdded ? 'text-green-500' : 'text-foreground'}`}>
+                  {addToShoppingMutation.isPending
+                    ? t('recipes.adding')
+                    : shoppingAdded
+                      ? t('recipes.added')
+                      : t('recipes.addToShopping')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -182,9 +256,8 @@ export default function RecipeDetailScreen() {
               {ingredients.map((ing, i) => (
                 <View
                   key={ing.id ?? i}
-                  className={`flex-row items-center justify-between px-4 py-3 ${
-                    i < ingredients.length - 1 ? 'border-b border-border' : ''
-                  }`}
+                  className={`flex-row items-center justify-between px-4 py-3 ${i < ingredients.length - 1 ? 'border-b border-border' : ''
+                    }`}
                 >
                   <Text className="font-medium text-foreground">{ing.name}</Text>
                   {(ing.quantity != null || ing.unit) && (
@@ -217,6 +290,73 @@ export default function RecipeDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Collections bottom sheet */}
+      <Modal
+        visible={collectionsOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCollectionsOpen(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/40 justify-end"
+          onPress={() => setCollectionsOpen(false)}
+        >
+          <Pressable>
+            <View className="bg-background rounded-t-3xl p-6 pb-10">
+              <Text className="font-bold text-lg mb-4 text-foreground">
+                {t('collections.addToCollection')}
+              </Text>
+              <ScrollView style={{ maxHeight: 320 }} keyboardShouldPersistTaps="handled">
+                {collections.length === 0 && (
+                  <Text className="text-muted-foreground text-sm mb-2">
+                    {t('collections.empty_title')}
+                  </Text>
+                )}
+                {collections.map((col) => {
+                  const selected = selectedCollectionIds.has(col.id);
+                  return (
+                    <TouchableOpacity
+                      key={col.id}
+                      onPress={() => toggleCollection(col.id)}
+                      className="flex-row items-center justify-between py-3 border-b border-border"
+                    >
+                      <Text className="text-base text-foreground">{col.name}</Text>
+                      <View
+                        className={`w-5 h-5 rounded border-2 items-center justify-center ${selected ? 'bg-primary border-primary' : 'border-border'
+                          }`}
+                      >
+                        {selected && <Text className="text-white text-xs font-bold">✓</Text>}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              {/* New collection input */}
+              <View className="flex-row gap-2 mt-4">
+                <TextInput
+                  className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-foreground"
+                  placeholder={t('collections.name')}
+                  placeholderTextColor="#8a7a68"
+                  value={newCollectionName}
+                  onChangeText={setNewCollectionName}
+                  onSubmitEditing={createAndAddCollection}
+                  returnKeyType="done"
+                />
+                <TouchableOpacity
+                  onPress={createAndAddCollection}
+                  disabled={!newCollectionName.trim()}
+                  className="bg-primary rounded-xl w-12 items-center justify-center"
+                  style={{ opacity: !newCollectionName.trim() ? 0.5 : 1 }}
+                >
+                  <Text className="text-primary-foreground text-xl font-bold">+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

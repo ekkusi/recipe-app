@@ -64,7 +64,7 @@ export default async function PublicRecipePage({
               size="sm"
               className="rounded-xl shrink-0"
             >
-              {t("editRecipe").replace("Muokkaa ", "")} →
+              {t("editRecipe")} →
             </Button>
           )}
         </div>
