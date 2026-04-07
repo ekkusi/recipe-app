@@ -21,6 +21,9 @@ import { apiFetch } from '../../../lib/api';
 import { UnitPicker } from '../../../components/ui/UnitPicker';
 import { supabase } from '../../../lib/supabase';
 import { getActiveListId, setActiveListId as persistActiveListId } from '../../../lib/active-shopping-list';
+import Sortable from 'react-native-sortables';
+import { Ionicons } from '@expo/vector-icons';
+import { Dimensions } from 'react-native';
 
 export default function ShoppingListScreen() {
   const { getToken } = useAuth();
@@ -37,6 +40,7 @@ export default function ShoppingListScreen() {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [listPickerOpen, setListPickerOpen] = useState(false);
   const [newListOpen, setNewListOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
@@ -136,6 +140,7 @@ export default function ShoppingListScreen() {
         quantity: q,
         unit: u,
         checked: false,
+        added_by: '',
         created_at: new Date().toISOString(),
       };
       queryClient.setQueryData(['shopping-list-items', resolvedListId], (old: ShoppingItem[] = []) =>
@@ -262,6 +267,14 @@ export default function ShoppingListScreen() {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: (orderedIds: string[]) =>
+      apiFetch(`/api/shopping-lists/${resolvedListId}/items`, getToken, {
+        method: 'PUT',
+        body: JSON.stringify({ orderedIds }),
+      }),
+  });
+
   function handleAdd() {
     if (!name.trim() || !resolvedListId) return;
     addMutation.mutate({
@@ -379,16 +392,39 @@ export default function ShoppingListScreen() {
           <>
             {unchecked.length > 0 && (
               <View className="bg-card border border-border rounded-2xl overflow-hidden mb-4">
-                {unchecked.map((item, i) => (
-                  <ShoppingItemRow
-                    key={item.id}
-                    item={item}
-                    showDivider={i < unchecked.length - 1}
-                    onToggle={() => toggleMutation.mutate({ id: item.id, checked: !item.checked })}
-                    onDelete={() => deleteMutation.mutate(item.id)}
-                    onUpdate={(n) => updateItemMutation.mutate({ id: item.id, name: n })}
-                  />
-                ))}
+                <Sortable.Flex
+                  customHandle
+                  flexDirection="column"
+                  width="fill"
+                  gap={0}
+                  onDragEnd={({ fromIndex, toIndex }) => {
+                    if (fromIndex === toIndex) return;
+                    const newUnchecked = [...unchecked];
+                    const [moved] = newUnchecked.splice(fromIndex, 1);
+                    newUnchecked.splice(toIndex, 0, moved);
+                    queryClient.setQueryData(
+                      ['shopping-list-items', resolvedListId],
+                      [...newUnchecked, ...checked]
+                    );
+                    reorderMutation.mutate(newUnchecked.map((i) => i.id));
+                  }}
+                >
+                  {unchecked.map((item, i) => (
+                    <View key={item.id} style={{ width: Dimensions.get('window').width - 32 }}>
+                      <ShoppingItemRow
+                        item={item}
+                        showDivider={i < unchecked.length - 1}
+                        isEditing={editingItemId === item.id}
+                        draggable
+                        onToggle={() => toggleMutation.mutate({ id: item.id, checked: !item.checked })}
+                        onLongPress={() => setEditingItemId(item.id)}
+                        onBlurEdit={() => setEditingItemId(null)}
+                        onDelete={() => deleteMutation.mutate(item.id)}
+                        onUpdate={(n) => updateItemMutation.mutate({ id: item.id, name: n })}
+                      />
+                    </View>
+                  ))}
+                </Sortable.Flex>
               </View>
             )}
 
@@ -408,7 +444,10 @@ export default function ShoppingListScreen() {
                       key={item.id}
                       item={item}
                       showDivider={i < checked.length - 1}
+                      isEditing={editingItemId === item.id}
                       onToggle={() => toggleMutation.mutate({ id: item.id, checked: !item.checked })}
+                      onLongPress={() => setEditingItemId(item.id)}
+                      onBlurEdit={() => setEditingItemId(null)}
                       onDelete={() => deleteMutation.mutate(item.id)}
                       onUpdate={(n) => updateItemMutation.mutate({ id: item.id, name: n })}
                     />
@@ -536,31 +575,52 @@ export default function ShoppingListScreen() {
 function ShoppingItemRow({
   item,
   showDivider,
+  isEditing,
+  draggable,
   onToggle,
+  onLongPress,
+  onBlurEdit,
   onDelete,
   onUpdate,
 }: {
   item: ShoppingItem;
   showDivider: boolean;
+  isEditing: boolean;
+  draggable?: boolean;
   onToggle: () => void;
+  onLongPress: () => void;
+  onBlurEdit: () => void;
   onDelete: () => void;
   onUpdate: (name: string) => void;
 }) {
   const [editName, setEditName] = useState(item.name);
 
+  // Keep local edit name in sync when item name changes externally
+  if (!isEditing && editName !== item.name) {
+    setEditName(item.name);
+  }
+
   function handleBlur() {
     const trimmed = editName.trim();
     if (!trimmed) {
       setEditName(item.name);
-      return;
-    }
-    if (trimmed !== item.name) {
+    } else if (trimmed !== item.name) {
       onUpdate(trimmed);
     }
+    onBlurEdit();
   }
 
   return (
     <View className={`flex-row items-center px-4 py-2.5 gap-3 ${showDivider ? 'border-b border-border' : ''}`}>
+      {draggable ? (
+        <Sortable.Handle>
+          <View style={{ paddingHorizontal: 2, justifyContent: 'center' }}>
+            <Ionicons name="reorder-three-outline" size={18} color="#b06060" style={{ opacity: 0.5 }} />
+          </View>
+        </Sortable.Handle>
+      ) : (
+        <View style={{ width: 22 }} />
+      )}
       <Pressable onPress={onToggle} hitSlop={8} className="active:opacity-75 shrink-0">
         <View
           className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
@@ -570,20 +630,34 @@ function ShoppingItemRow({
           {item.checked && <Text className="text-white text-xs font-bold">✓</Text>}
         </View>
       </Pressable>
-      <TextInput
-        className={`flex-1 text-base text-foreground py-0.5 ${item.checked ? 'line-through opacity-50' : ''}`}
-        value={editName}
-        onChangeText={setEditName}
-        onBlur={handleBlur}
-        editable={!item.id.startsWith('temp-')}
-        multiline={false}
-        returnKeyType="done"
-        blurOnSubmit
-      />
-      {(item.quantity != null || item.unit) && (
-        <Text className="text-sm text-muted-foreground shrink-0">
-          {[item.quantity, item.unit].filter(Boolean).join(' ')}
-        </Text>
+      {isEditing ? (
+        <TextInput
+          autoFocus
+          className="flex-1 text-base text-foreground py-0.5"
+          value={editName}
+          onChangeText={setEditName}
+          onBlur={handleBlur}
+          editable={!item.id.startsWith('temp-')}
+          multiline={false}
+          returnKeyType="done"
+          blurOnSubmit
+        />
+      ) : (
+        <TouchableOpacity
+          onPress={onToggle}
+          onLongPress={onLongPress}
+          delayLongPress={400}
+          className="flex-1 py-0.5 active:opacity-75"
+        >
+          <Text className={`text-base text-foreground ${item.checked ? 'line-through opacity-50' : ''}`}>
+            {item.name}
+            {(item.quantity != null || item.unit) ? (
+              <Text className="text-sm text-muted-foreground">
+                {'  '}{[item.quantity, item.unit].filter(Boolean).join(' ')}
+              </Text>
+            ) : null}
+          </Text>
+        </TouchableOpacity>
       )}
       <TouchableOpacity onPress={onDelete} hitSlop={8} className="shrink-0">
         <Text className="text-muted-foreground text-lg px-1">×</Text>

@@ -58,7 +58,8 @@
       "addSubtitle": "Lisää väliotsikko",
       "subtitlePlaceholder": "Väliotsikko",
       "stepPlaceholder": "Vaihe {step}…",
-      "addStep": "Lisää vaihe"
+      "addStep": "Lisää vaihe",
+      "pasteFromClipboard": "Liitä leikepöydältä"
     },
     "selectIngredients": "Valitse ainesosat",
     "addSelected": "Lisää valitut"

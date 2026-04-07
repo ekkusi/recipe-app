@@ -2,11 +2,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { recipeFormSchema, type RecipeFormSchema } from "@recipe-app/shared";
+import { recipeFormSchema, type RecipeFormSchema, parseIngredientLine } from "@recipe-app/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +48,60 @@ interface RecipeFormProps {
 
 const emptyIngredient = () => ({ name: "", quantity: "", unit: "", is_section_header: false });
 const emptySubtitle = () => ({ name: "", quantity: "", unit: "", is_section_header: true });
+
+function SortableStepItem({
+  id,
+  index,
+  register,
+  onRemove,
+  stepPlaceholder,
+}: {
+  id: string;
+  index: number;
+  register: ReturnType<typeof useForm<RecipeFormSchema>>["register"];
+  onRemove: () => void;
+  stepPlaceholder: string;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+      }}
+      className="flex items-start gap-2"
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="mt-2.5 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0"
+      >
+        <GripVertical size={16} />
+      </button>
+      <span className="mt-2.5 text-sm font-bold text-muted-foreground w-6 shrink-0 text-right">
+        {index + 1}.
+      </span>
+      <Textarea
+        placeholder={stepPlaceholder}
+        {...register(`instructions.${index}.content`)}
+        className="flex-1 rounded-xl resize-none"
+        rows={2}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={onRemove}
+        className="mt-1 text-muted-foreground hover:text-destructive shrink-0"
+      >
+        <Trash2 size={16} />
+      </Button>
+    </div>
+  );
+}
 
 
 export function RecipeForm({
@@ -85,7 +153,7 @@ export function RecipeForm({
     fields: instructionFields,
     append: appendInstruction,
     remove: removeInstruction,
-    swap: swapInstruction,
+    move: moveInstruction,
   } = useFieldArray({ control, name: "instructions" });
 
   const tag_ids = watch("tag_ids");
@@ -95,6 +163,39 @@ export function RecipeForm({
       ? tag_ids.filter((id) => id !== tagId)
       : [...tag_ids, tagId];
     setValue("tag_ids", next);
+  }
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  function handleInstructionDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const fromIndex = instructionFields.findIndex((f) => f.id === active.id);
+    const toIndex = instructionFields.findIndex((f) => f.id === over.id);
+    if (fromIndex !== -1 && toIndex !== -1) moveInstruction(fromIndex, toIndex);
+  }
+
+  async function pasteIngredients() {
+    const text = await navigator.clipboard.readText().catch(() => "");
+    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    lines.forEach((line) => {
+      const parsed = parseIngredientLine(line);
+      appendIngredient({
+        name: parsed.name,
+        quantity: parsed.quantity,
+        unit: parsed.unit,
+        is_section_header: false,
+      });
+    });
+  }
+
+  async function pasteInstructions() {
+    const text = await navigator.clipboard.readText().catch(() => "");
+    const lines = text
+      .split("\n")
+      .map((l) => l.replace(/^(\d+[.)]\s*|[-*•–]\s*)/, "").trim())
+      .filter(Boolean);
+    lines.forEach((content) => appendInstruction({ content }));
   }
 
   return (
@@ -233,7 +334,7 @@ export function RecipeForm({
         {errors.ingredients?.root && (
           <p className="text-sm text-destructive">{errors.ingredients.root.message}</p>
         )}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             type="button"
             variant="outline"
@@ -259,75 +360,72 @@ export function RecipeForm({
           >
             {t('form.addSubtitle')}
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-xl"
+            onClick={pasteIngredients}
+          >
+            {t('form.pasteFromClipboard')}
+          </Button>
         </div>
       </div>
 
       {/* Instructions */}
       <div className="flex flex-col gap-3">
         <Label>{t('instructions')}</Label>
-        <div className="flex flex-col gap-2">
-          {instructionFields.map((field, i) => (
-            <div key={field.id} className="flex items-start gap-2">
-              <span className="mt-2.5 text-sm font-bold text-muted-foreground w-6 shrink-0 text-right">
-                {i + 1}.
-              </span>
-              <Textarea
-                placeholder={t('form.stepPlaceholder', { step: i + 1 })}
-                {...register(`instructions.${i}.content`)}
-                className="flex-1 rounded-xl resize-none"
-                rows={2}
-              />
-              <div className="flex flex-col gap-0.5 mt-1 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => swapInstruction(i, i - 1)}
-                  disabled={i === 0}
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-25"
-                >
-                  <ChevronUp size={14} />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => swapInstruction(i, i + 1)}
-                  disabled={i === instructionFields.length - 1}
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-25"
-                >
-                  <ChevronDown size={14} />
-                </Button>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeInstruction(i)}
-                className="mt-1 text-muted-foreground hover:text-destructive shrink-0"
-              >
-                <Trash2 size={16} />
-              </Button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleInstructionDragEnd}
+        >
+          <SortableContext
+            items={instructionFields.map((f) => f.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="flex flex-col gap-2">
+              {instructionFields.map((field, i) => (
+                <SortableStepItem
+                  key={field.id}
+                  id={field.id}
+                  index={i}
+                  register={register}
+                  onRemove={() => removeInstruction(i)}
+                  stepPlaceholder={t('form.stepPlaceholder', { step: i + 1 })}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
         {errors.instructions?.root && (
           <p className="text-sm text-destructive">{errors.instructions.root.message}</p>
         )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="rounded-xl self-start"
-          onClick={() => {
-            const newIndex = instructionFields.length;
-            appendInstruction({ content: "" });
-            setTimeout(() => setFocus(`instructions.${newIndex}.content`), 0);
-          }}
-        >
-          <Plus size={14} />
-          {t('form.addStep')}
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-xl self-start"
+            onClick={() => {
+              const newIndex = instructionFields.length;
+              appendInstruction({ content: "" });
+              setTimeout(() => setFocus(`instructions.${newIndex}.content`), 0);
+            }}
+          >
+            <Plus size={14} />
+            {t('form.addStep')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-xl self-start"
+            onClick={pasteInstructions}
+          >
+            {t('form.pasteFromClipboard')}
+          </Button>
+        </div>
       </div>
 
       {/* Actions */}

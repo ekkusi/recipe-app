@@ -74,6 +74,7 @@
     "form_subtitlePlaceholder": "Väliotsikko",
     "form_stepPlaceholder": "Vaihe {{step}}…",
     "form_addStep": "+ Lisää vaihe",
+    "form_pasteFromClipboard": "Liitä leikepöydältä",
     "selectIngredients": "Valitse ainesosat",
     "addSelected": "Lisää valitut"
   },

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { GripVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +12,7 @@ interface ShoppingItemProps {
   checked: boolean;
   onToggle: (id: string, checked: boolean) => void;
   onDelete: (id: string) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
 }
 
 export function ShoppingItem({
@@ -23,9 +23,19 @@ export function ShoppingItem({
   checked,
   onToggle,
   onDelete,
+  dragHandleProps,
 }: ShoppingItemProps) {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
+      {dragHandleProps && (
+        <button
+          type="button"
+          {...dragHandleProps}
+          className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing shrink-0"
+        >
+          <GripVertical size={16} />
+        </button>
+      )}
       <button
         type="button"
         onClick={() => onToggle(id, !checked)}

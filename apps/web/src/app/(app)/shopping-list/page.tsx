@@ -4,6 +4,20 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, MoreVertical, X, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +38,37 @@ export default function ShoppingListPage() {
     <Suspense>
       <ShoppingListContent />
     </Suspense>
+  );
+}
+
+function SortableShoppingItem({
+  item,
+  onToggle,
+  onDelete,
+}: {
+  item: ShoppingItemType;
+  onToggle: (id: string, checked: boolean) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        position: "relative",
+        zIndex: isDragging ? 1 : "auto",
+      }}
+    >
+      <ShoppingItem
+        {...item}
+        onToggle={onToggle}
+        onDelete={onDelete}
+        dragHandleProps={{ ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>}
+      />
+    </div>
   );
 }
 
@@ -231,6 +276,25 @@ function ShoppingListContent() {
   const unchecked = items.filter((i) => !i.checked);
   const checked = items.filter((i) => i.checked);
 
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  function handleItemDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const fromIndex = unchecked.findIndex((i) => i.id === active.id);
+    const toIndex = unchecked.findIndex((i) => i.id === over.id);
+    if (fromIndex === -1 || toIndex === -1) return;
+    const newUnchecked = [...unchecked];
+    const [moved] = newUnchecked.splice(fromIndex, 1);
+    newUnchecked.splice(toIndex, 0, moved);
+    setItems([...newUnchecked, ...checked]);
+    fetch(`/api/shopping-lists/${activeListId}/items`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderedIds: newUnchecked.map((i) => i.id) }),
+    });
+  }
+
   return (
     <>
       {/* Header with list selector + hamburger */}
@@ -341,16 +405,20 @@ function ShoppingListContent() {
 
         {/* Unchecked items */}
         {unchecked.length > 0 && (
-          <div className="bg-white rounded-3xl border border-border divide-y divide-border overflow-hidden">
-            {unchecked.map((item) => (
-              <ShoppingItem
-                key={item.id}
-                {...item}
-                onToggle={handleToggle}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleItemDragEnd}>
+            <SortableContext items={unchecked.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+              <div className="bg-white rounded-3xl border border-border divide-y divide-border overflow-hidden">
+                {unchecked.map((item) => (
+                  <SortableShoppingItem
+                    key={item.id}
+                    item={item}
+                    onToggle={handleToggle}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
 
         {/* Checked items */}

@@ -103,9 +103,22 @@ export async function getListItems(listId: string, userId: string): Promise<Shop
     .select("*")
     .eq("list_id", listId)
     .order("checked", { ascending: true })
-    .order("created_at", { ascending: false });
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
   if (error) throw error;
   return data as ShoppingItem[];
+}
+
+function mergeQuantity(existing: string | null, incoming: string | null): string | null {
+  if (incoming === null || incoming === "") return existing;
+  if (existing === null || existing === "") return incoming;
+  const a = parseFloat(existing);
+  const b = parseFloat(incoming);
+  if (isFinite(a) && isFinite(b)) {
+    const sum = a + b;
+    return Number.isInteger(sum) ? sum.toString() : sum.toString();
+  }
+  return `${existing} + ${incoming}`;
 }
 
 export async function addShoppingItem(
@@ -115,9 +128,48 @@ export async function addShoppingItem(
 ): Promise<ShoppingItem> {
   const supabase = createServiceClient();
   await assertMember(supabase, listId, userId);
+
+  // Check for existing unchecked item with same name+unit to merge quantity
+  let existingQuery = supabase
+    .from("shopping_list_items")
+    .select("*")
+    .eq("list_id", listId)
+    .eq("checked", false)
+    .ilike("name", item.name);
+
+  if (item.unit) {
+    existingQuery = existingQuery.eq("unit", item.unit);
+  } else {
+    existingQuery = existingQuery.is("unit", null);
+  }
+
+  const { data: existing } = await existingQuery.maybeSingle();
+
+  if (existing) {
+    const newQty = mergeQuantity(existing.quantity, item.quantity);
+    const { data, error } = await supabase
+      .from("shopping_list_items")
+      .update({ quantity: newQty })
+      .eq("id", existing.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as ShoppingItem;
+  }
+
+  // Get next sort_order for new item
+  const { data: maxRow } = await supabase
+    .from("shopping_list_items")
+    .select("sort_order")
+    .eq("list_id", listId)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = ((maxRow?.sort_order ?? -1) as number) + 1;
+
   const { data, error } = await supabase
     .from("shopping_list_items")
-    .insert({ list_id: listId, added_by: userId, ...item })
+    .insert({ list_id: listId, added_by: userId, sort_order: nextOrder, ...item })
     .select()
     .single();
   if (error) throw error;
@@ -129,12 +181,28 @@ export async function addShoppingItems(
   userId: string,
   items: ShoppingItemInput[]
 ) {
+  // Process sequentially so each merge sees the updated state of previous insertions
+  for (const item of items) {
+    await addShoppingItem(listId, userId, item);
+  }
+}
+
+export async function reorderShoppingItems(
+  listId: string,
+  userId: string,
+  orderedIds: string[]
+) {
   const supabase = createServiceClient();
   await assertMember(supabase, listId, userId);
-  const { error } = await supabase
-    .from("shopping_list_items")
-    .insert(items.map((item) => ({ list_id: listId, added_by: userId, ...item })));
-  if (error) throw error;
+  await Promise.all(
+    orderedIds.map((id, idx) =>
+      supabase
+        .from("shopping_list_items")
+        .update({ sort_order: idx })
+        .eq("id", id)
+        .eq("list_id", listId)
+    )
+  );
 }
 
 export async function toggleShoppingItem(id: string, checked: boolean, listId: string, userId: string) {

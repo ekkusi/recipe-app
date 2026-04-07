@@ -2,9 +2,10 @@ import { useRef } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Tag } from '@recipe-app/shared';
-import { recipeFormSchema, type RecipeFormSchema } from '@recipe-app/shared';
+import { recipeFormSchema, type RecipeFormSchema, parseIngredientLine } from '@recipe-app/shared';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 
 import { UnitPicker } from '../ui/UnitPicker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
@@ -19,7 +20,7 @@ interface RecipeFormProps {
 }
 
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
-const emptyIngredient = () => ({ name: '', quantity: '', unit: '', is_section_header: false });
+const emptyIngredient = (name = '') => ({ name, quantity: '', unit: '', is_section_header: false });
 const emptySubtitle = () => ({ name: '', quantity: '', unit: '', is_section_header: true });
 
 export function RecipeForm({
@@ -72,6 +73,20 @@ export function RecipeForm({
 
   const difficulty = watch('difficulty');
   const tag_ids = watch('tag_ids');
+
+  async function pasteIngredients() {
+    const text = await Clipboard.getStringAsync();
+    const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+    lines.forEach((line) => {
+      const parsed = parseIngredientLine(line);
+      appendIngredient({
+        name: parsed.name,
+        quantity: parsed.quantity,
+        unit: parsed.unit,
+        is_section_header: false,
+      });
+    });
+  }
 
   function toggleTag(tagId: string) {
     const next = tag_ids.includes(tagId)
@@ -271,7 +286,7 @@ export function RecipeForm({
             </Text>
           )
         ))}
-        <View className="flex-row gap-3 mt-2">
+        <View className="flex-row flex-wrap gap-3 mt-2">
           <TouchableOpacity
             onPress={() => {
               const newIndex = ingredientFields.length;
@@ -286,6 +301,9 @@ export function RecipeForm({
           >
             <Text className="text-primary text-sm font-semibold">{t('recipes.form_addSectionHeader')}</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={pasteIngredients}>
+            <Text className="text-primary text-sm font-semibold">{t('recipes.form_pasteFromClipboard')}</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -298,6 +316,7 @@ export function RecipeForm({
         onMove={moveInstruction}
         onRemove={removeInstruction}
         onAppend={() => appendInstruction({ content: '' })}
+        onPaste={(lines) => lines.forEach((content) => appendInstruction({ content }))}
       />
 
       {/* Privacy */}

@@ -16,6 +16,7 @@ export type ShoppingItem = {
   checked: boolean;
   added_by: string;
   created_at: string;
+  sort_order?: number;
 };
 
 export type ShoppingItemInput = {

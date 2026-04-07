@@ -6,6 +6,7 @@ import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Sortable from 'react-native-sortables';
 import { Ionicons } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 
 interface Props {
   fields: { id: string }[];
@@ -15,6 +16,7 @@ interface Props {
   onMove: (from: number, to: number) => void;
   onRemove: (i: number) => void;
   onAppend: () => void;
+  onPaste: (lines: string[]) => void;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -27,8 +29,18 @@ export function SortableInstructionList({
   onMove,
   onRemove,
   onAppend,
+  onPaste,
 }: Props) {
   const { t } = useTranslation();
+
+  async function handlePaste() {
+    const text = await Clipboard.getStringAsync();
+    const lines = text
+      .split('\n')
+      .map((l) => l.replace(/^(\d+[.)]\s*|[-*•–]\s*)/, '').trim())
+      .filter(Boolean);
+    if (lines.length > 0) onPaste(lines);
+  }
 
   return (
     <View className="flex-1 mb-6 w-full">
@@ -97,16 +109,20 @@ export function SortableInstructionList({
           ) : null
         )}
 
-      <TouchableOpacity
-        onPress={() => {
-          const newIndex = fields.length;
-          onAppend();
-          setTimeout(() => instructionRefs.current[newIndex]?.focus(), 50);
-        }}
-        className="mt-2 self-start"
-      >
-        <Text className="text-primary text-sm font-semibold">{t('recipes.form_addStep')}</Text>
-      </TouchableOpacity>
+      <View className="flex-row gap-4 mt-2">
+        <TouchableOpacity
+          onPress={() => {
+            const newIndex = fields.length;
+            onAppend();
+            setTimeout(() => instructionRefs.current[newIndex]?.focus(), 50);
+          }}
+        >
+          <Text className="text-primary text-sm font-semibold">{t('recipes.form_addStep')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handlePaste}>
+          <Text className="text-primary text-sm font-semibold">{t('recipes.form_pasteFromClipboard')}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
