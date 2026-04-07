@@ -86,7 +86,16 @@ export default function RecipeDetailScreen() {
 
   async function handleShare() {
     const appUrl = process.env.EXPO_PUBLIC_API_BASE_URL ?? '';
-    await Share.share({ url: `${appUrl}/r/${id}`, message: recipe?.title ?? '' });
+    const shareUrl = `${appUrl}/r/${id}`;
+    // On Android only `message` is supported; include the URL there too.
+    // On iOS both fields are used — `url` opens natively, `message` adds context.
+    await Share.share({
+      url: Platform.OS === "ios" ? shareUrl : undefined,
+      title: Platform.OS === "android" ? recipe?.title : undefined,
+      message: Platform.OS === 'android'
+        ? shareUrl
+        : recipe?.title ?? "",
+    });
   }
 
   async function handleCopy() {

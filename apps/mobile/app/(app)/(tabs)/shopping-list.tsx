@@ -289,7 +289,7 @@ export default function ShoppingListScreen() {
     setMenuOpen(false);
     try {
       const { url } = await apiFetch<{ url: string }>(`/api/shopping-lists/${resolvedListId}/invite`, getToken);
-      await Share.share({ url });
+      await Share.share({ url, message: url });
     } catch {
       Alert.alert(t('common.error'));
     }

@@ -35,7 +35,10 @@
       "WebFetch(domain:react-native-sortables-docs.vercel.app)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:www.npmjs.com)",
-      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/node_modules/react-native-sortables -name index.*)"
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/node_modules/react-native-sortables -name index.*)",
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/recipes/[id] -type f -name *.ts -o -name *.tsx)",
+      "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shopping-lists/[listId] -type f -name *.ts -o -name *.tsx)",
+      "Bash(find:*)"
     ]
   }
 }
