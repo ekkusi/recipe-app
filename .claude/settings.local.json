@@ -38,7 +38,8 @@
       "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/node_modules/react-native-sortables -name index.*)",
       "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/recipes/[id] -type f -name *.ts -o -name *.tsx)",
       "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shopping-lists/[listId] -type f -name *.ts -o -name *.tsx)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(ls -la /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/lib/db/account.ts /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/account/delete/route.ts /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/settings/page.tsx /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/settings/delete-account/page.tsx /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/settings/delete-account/delete-account-form.tsx)"
     ]
   }
 }

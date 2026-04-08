@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
-import { BookOpen, ShoppingCart, Plus } from "lucide-react";
+import { BookOpen, ShoppingCart, Plus, Settings } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 
@@ -12,11 +12,19 @@ export default async function HomePage() {
 
   return (
     <div className="pt-8 pb-4">
-      <div className="mb-8">
-        <p className="text-muted-foreground text-sm font-medium">{t('greeting')}</p>
-        <h1 className="text-3xl font-bold mt-0.5">
-          {firstName ? t('greetingUser', { name: firstName }) : t('greeting')}
-        </h1>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <p className="text-muted-foreground text-sm font-medium">{t('greeting')}</p>
+          <h1 className="text-3xl font-bold mt-0.5">
+            {firstName ? t('greetingUser', { name: firstName }) : t('greeting')}
+          </h1>
+        </div>
+        <Link
+          href="/settings"
+          className="p-2 hover:bg-primary/10 rounded-xl transition-colors"
+        >
+          <Settings size={24} className="text-muted-foreground hover:text-primary" />
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

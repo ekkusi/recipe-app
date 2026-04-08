@@ -120,5 +120,25 @@
       "title": "Kokoelma on tyhjä",
       "subtitle": "Lisää reseptejä reseptin sivulta"
     }
+  },
+  "settings": {
+    "title": "Asetukset",
+    "account": "Tili",
+    "email": "Sähköposti",
+    "deleteAccount": "Poista tili"
+  },
+  "deleteAccount": {
+    "title": "Poista tili",
+    "warning": "Tämä toiminto on peruuttamaton. Kaikki tietosi poistetaan pysyvästi.",
+    "whatGetsDeleted": "Seuraavat tiedot poistetaan:",
+    "item_recipes": "Kaikki reseptisi",
+    "item_collections": "Kaikki kokoelmasi",
+    "item_shoppingLists": "Kaikki ostoslistasi",
+    "confirmEmail": "Kirjoita sähköpostiosoitteesi vahvistukseksi",
+    "confirmCheck": "Ymmärrän, että tätä toimintoa ei voi peruuttaa",
+    "submit": "Poista tilini pysyvästi",
+    "submitting": "Poistetaan…",
+    "error": "Tapahtui virhe. Yritä uudelleen.",
+    "deleted": "Tilisi on poistettu onnistuneesti."
   }
 }
