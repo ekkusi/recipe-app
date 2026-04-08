@@ -37,6 +37,10 @@
     "mfa": {
       "title": "Vahvista henkilöllisyytesi",
       "instruction": "Anna sähköpostiisi lähetetty koodi"
+    },
+    "google": {
+      "signIn": "Kirjaudu sisään Googlella",
+      "or": "tai"
     }
   },
   "recipes": {

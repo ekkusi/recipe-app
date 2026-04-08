@@ -20,6 +20,7 @@
 		4A656E977E34489D9A89DAAA = {isa = PBXBuildFile; fileRef = 86C678ADB2AC447D83FDB638 /* ClerkViewFactory.swift */; };
 		5C01B40FE0B449CAA563CC18 = {isa = PBXBuildFile; fileRef = 01F7D62EE56D4CC4B56CE152 /* ClerkViewFactory.swift */; };
 		C133B75A98DC4B85BF5DEA98 = {isa = PBXBuildFile; fileRef = D09D8EBDA7CF4F57B9D8A664 /* ClerkViewFactory.swift */; };
+		A380311A7B294E548C03CB06 = {isa = PBXBuildFile; fileRef = 57423F86F1DB4B5CB69A67B3 /* ClerkViewFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		86C678ADB2AC447D83FDB638 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 		01F7D62EE56D4CC4B56CE152 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 		D09D8EBDA7CF4F57B9D8A664 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
+		57423F86F1DB4B5CB69A67B3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 				86C678ADB2AC447D83FDB638 /* ClerkViewFactory.swift */,
 				01F7D62EE56D4CC4B56CE152 /* ClerkViewFactory.swift */,
 				D09D8EBDA7CF4F57B9D8A664 /* ClerkViewFactory.swift */,
+				57423F86F1DB4B5CB69A67B3 /* ClerkViewFactory.swift */,
 			);
 			name = Reseptimania;
 			sourceTree = "<group>";
@@ -184,6 +187,8 @@
 				FEAE97F4822E48E6945DAEC2 /* ClerkKitUI */,
 				9F9627E5FA3047B2830F9ACA /* ClerkKit */,
 				4151FDF143394E04A34CF207 /* ClerkKitUI */,
+				D293991AA28A47CA89ECBB0C /* ClerkKit */,
+				092D7869450B401BB3C36F72 /* ClerkKitUI */,
 			);
 			productName = Reseptimania;
 			productReference = 13B07F961A680F5B00A75B9A /* Reseptimania.app */;
@@ -381,6 +386,7 @@
 				4A656E977E34489D9A89DAAA /* ClerkViewFactory.swift */,
 				5C01B40FE0B449CAA563CC18 /* ClerkViewFactory.swift */,
 				C133B75A98DC4B85BF5DEA98 /* ClerkViewFactory.swift */,
+				A380311A7B294E548C03CB06 /* ClerkViewFactory.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -647,6 +653,14 @@
 				version = 1.0.0;
 			};
 		};
+		34B73834CE8D440D8E161153 = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = https://github.com/clerk/clerk-ios.git;
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -708,6 +722,16 @@
 		4151FDF143394E04A34CF207 = {
 			isa = XCSwiftPackageProductDependency;
 			package = F088F8B950054DD5B30E1B3D;
+			productName = ClerkKitUI;
+		};
+		D293991AA28A47CA89ECBB0C = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34B73834CE8D440D8E161153;
+			productName = ClerkKit;
+		};
+		092D7869450B401BB3C36F72 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34B73834CE8D440D8E161153;
 			productName = ClerkKitUI;
 		};
 /* End XCSwiftPackageProductDependency section */
