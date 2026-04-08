@@ -24,6 +24,7 @@ import { getActiveListId, setActiveListId as persistActiveListId } from '../../.
 import Sortable from 'react-native-sortables';
 import { Ionicons } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ShoppingListScreen() {
   const { getToken } = useAuth();
@@ -37,6 +38,7 @@ export default function ShoppingListScreen() {
     persistActiveListId(id);
   }
 
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
@@ -321,9 +323,10 @@ export default function ShoppingListScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       className="flex-1 bg-background"
+      style={{ paddingTop: insets.top + 8 }}
     >
       {/* Header */}
-      <View className="px-4 pt-14 pb-4 flex-row items-center gap-2">
+      <View className="px-4 pb-4 flex-row items-center gap-2">
         <TouchableOpacity
           className="flex-1 flex-row items-center gap-1"
           onPress={() => setListPickerOpen(true)}
@@ -493,7 +496,7 @@ export default function ShoppingListScreen() {
       <Modal visible={listPickerOpen} transparent animationType="slide" onRequestClose={() => setListPickerOpen(false)}>
         <Pressable className="flex-1 bg-black/40 justify-end" onPress={() => setListPickerOpen(false)}>
           <Pressable>
-            <View className="bg-background rounded-t-3xl p-6">
+            <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
               <Text className="font-bold text-lg mb-4 text-foreground">{t('shopping.selectList')}</Text>
               {lists.map((l) => (
                 <TouchableOpacity

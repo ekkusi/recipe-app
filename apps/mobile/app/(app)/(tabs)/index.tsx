@@ -5,12 +5,14 @@ import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { apiFetch } from '../../../lib/api';
 
 export default function RecipesScreen() {
   const { getToken } = useAuth();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const { data: recipes, isLoading, error } = useQuery({
     queryKey: ['recipes'],
@@ -18,8 +20,8 @@ export default function RecipesScreen() {
   });
 
   return (
-    <View className="flex-1 bg-background">
-      <View className="px-4 pt-14 pb-4 flex-row items-center justify-between">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8 }}>
+      <View className="px-4 pb-4 flex-row items-center justify-between">
         <Text className="text-2xl font-bold text-foreground">{t('recipes.title')}</Text>
         <TouchableOpacity
           onPress={() => router.push('/(app)/recipes/new')}

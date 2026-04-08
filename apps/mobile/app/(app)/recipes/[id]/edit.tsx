@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiFetch } from '../../../../lib/api';
 import { RecipeForm } from '../../../../components/recipes/RecipeForm';
 
@@ -14,6 +15,7 @@ export default function EditRecipeScreen() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const { data: recipe, isLoading: recipeLoading } = useQuery({
     queryKey: ['recipe', id],
@@ -83,8 +85,9 @@ export default function EditRecipeScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       className="flex-1 bg-background"
+      style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom }}
     >
-      <View className="px-4 pt-14 pb-4">
+      <View className="px-4 pb-4">
         <Text className="text-2xl font-bold text-foreground">{t('recipes.editRecipe')}</Text>
       </View>
       <RecipeForm

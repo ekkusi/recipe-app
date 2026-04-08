@@ -2,6 +2,7 @@ import { UNITS } from '@recipe-app/shared';
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface UnitPickerProps {
   value: string;
@@ -11,6 +12,7 @@ interface UnitPickerProps {
 export function UnitPicker({ value, onChange }: UnitPickerProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   function select(unit: string) {
     onChange(unit === value ? '' : unit);
@@ -34,7 +36,7 @@ export function UnitPicker({ value, onChange }: UnitPickerProps) {
           onPress={() => setOpen(false)}
         >
           <Pressable onPress={() => { }}>
-            <View className="bg-card rounded-t-3xl px-4 pt-4 pb-8">
+            <View className="bg-card rounded-t-3xl px-4 pt-4" style={{ paddingBottom: insets.bottom + 32 }}>
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-base font-bold text-foreground">{t('units.selectTitle')}</Text>
                 <TouchableOpacity onPress={() => setOpen(false)} hitSlop={8}>

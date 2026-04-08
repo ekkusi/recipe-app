@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiFetch } from '../../../lib/api';
 
 type Recipe = { id: string; title: string; difficulty: string | null; time_minutes: number | null };
@@ -14,6 +15,7 @@ export default function CollectionDetailScreen() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const { data, isLoading } = useQuery({
     queryKey: ['collection', id],
@@ -29,8 +31,8 @@ export default function CollectionDetailScreen() {
   const recipes = data?.collection_recipes.map((cr) => cr.recipes) ?? [];
 
   return (
-    <View className="flex-1 bg-background">
-      <View className="px-4 pt-14 pb-4 flex-row items-center gap-3">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom }}>
+      <View className="px-4 pb-4 flex-row items-center gap-3">
         <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-75">
           <Text className="text-primary font-semibold">{t('common.back')}</Text>
         </Pressable>

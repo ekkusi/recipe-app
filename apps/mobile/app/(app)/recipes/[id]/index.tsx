@@ -18,6 +18,7 @@ import {
   View,
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiFetch } from '../../../../lib/api';
 import { getActiveListId } from '../../../../lib/active-shopping-list';
 
@@ -29,6 +30,7 @@ export default function RecipeDetailScreen() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
+  const insets = useSafeAreaInsets();
   const [collectionsOpen, setCollectionsOpen] = useState(false);
   const [collections, setCollections] = useState<CollectionRow[]>([]);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<Set<string>>(new Set());
@@ -166,9 +168,9 @@ export default function RecipeDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom }}>
       {/* Header */}
-      <View className="px-4 pt-14 pb-4 flex-row items-center justify-between">
+      <View className="px-4 pb-4 flex-row items-center justify-between">
         <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-75">
           <Ionicons name="chevron-back" size={28} color="#b06060" />
         </Pressable>
@@ -345,7 +347,7 @@ export default function RecipeDetailScreen() {
           onPress={() => setBulkModalOpen(false)}
         >
           <Pressable>
-            <View className="bg-background rounded-t-3xl p-6 pb-10">
+            <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
               <Text className="font-bold text-lg mb-4 text-foreground">
                 {t('recipes.selectIngredients')}
               </Text>
@@ -400,7 +402,7 @@ export default function RecipeDetailScreen() {
           onPress={() => setCollectionsOpen(false)}
         >
           <Pressable>
-            <View className="bg-background rounded-t-3xl p-6 pb-10">
+            <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
               <Text className="font-bold text-lg mb-4 text-foreground">
                 {t('collections.addToCollection')}
               </Text>

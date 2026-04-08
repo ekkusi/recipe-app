@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { apiFetch } from '../../../lib/api';
 
@@ -13,6 +14,7 @@ export default function CollectionsScreen() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [newName, setNewName] = useState('');
 
   const { data: collections = [], isLoading } = useQuery({
@@ -39,8 +41,8 @@ export default function CollectionsScreen() {
   });
 
   return (
-    <View className="flex-1 bg-background">
-      <View className="px-4 pt-14 pb-2">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8 }}>
+      <View className="px-4">
         <Text className="text-2xl font-bold text-foreground mb-4">{t('collections.title')}</Text>
         <View className="flex-row gap-2 mb-4">
           <TextInput
