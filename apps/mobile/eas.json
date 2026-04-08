@@ -19,7 +19,8 @@
         "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YmVjb21pbmctaG9ybmV0LTExLmNsZXJrLmFjY291bnRzLmRldiQ",
         "EXPO_PUBLIC_SUPABASE_URL": "https://wttzdvoswmvhpghcxbrg.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_A_DYk3TB-RFve8HEhc1smQ_B2HOtj8Z",
-        "EXPO_PUBLIC_API_BASE_URL": "https://reseptimania.vercel.app"
+        "EXPO_PUBLIC_API_BASE_URL": "https://reseptimania.vercel.app",
+        "EXPO_PUBLIC_WEB_URL": "https://reseptimania.vercel.app"
       },
       "autoIncrement": true
     }

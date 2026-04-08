@@ -22,7 +22,9 @@
       "title": "Luo tili",
       "submit": "Rekisteröidy",
       "hasAccount": "Onko sinulla jo tili? ",
-      "signInLink": "Kirjaudu sisään"
+      "signInLink": "Kirjaudu sisään",
+      "agreePrefix": "Hyväksyn",
+      "privacyPolicy": "tietosuojakaaavan"
     },
     "verify": {
       "title": "Vahvista sähköposti",

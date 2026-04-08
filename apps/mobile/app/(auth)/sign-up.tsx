@@ -4,14 +4,26 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from '@recipe-app/shared';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Text, TextInput, View, Pressable } from 'react-native';
+import { useState } from 'react';
+import Constants from 'expo-constants';
 
 import { Button } from '../../components/ui/Button';
+import { PrivacyModal } from '../../components/ui/PrivacyModal';
 
 export default function SignUpScreen() {
   const { signUp, errors: clerkErrors, fetchStatus } = useSignUp();
   const router = useRouter();
   const { t } = useTranslation();
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+
+  // Get web app URL from environment or use default
+  const webUrl =
+    Constants.expoConfig?.extra?.webUrl ||
+    process.env.EXPO_PUBLIC_WEB_URL ||
+    'http://localhost:3000';
+  const privacyUrl = `${webUrl}/privacy`;
 
   const { control, handleSubmit, getValues, formState: { errors } } = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -104,16 +116,44 @@ export default function SignUpScreen() {
           <Text className="text-destructive text-sm -mt-2">{clerkErrors.fields.password.message}</Text>
         )}
 
+        <Pressable
+          onPress={() => setPrivacyAgreed(!privacyAgreed)}
+          className="flex-row items-center gap-3 py-3 px-4 bg-muted/50 rounded-2xl border border-border"
+        >
+          <View
+            className={`w-5 h-5 rounded border-2 items-center justify-center ${
+              privacyAgreed ? 'bg-primary border-primary' : 'border-border'
+            }`}
+          >
+            {privacyAgreed && <Text className="text-white text-xs font-bold">✓</Text>}
+          </View>
+          <Text className="flex-1 text-sm text-foreground">
+            {t('auth.signUp.agreePrefix')}{' '}
+            <Text
+              className="text-primary font-semibold underline"
+              onPress={() => setPrivacyModalVisible(true)}
+            >
+              {t('auth.signUp.privacyPolicy')}
+            </Text>
+          </Text>
+        </Pressable>
+
         <Button
           label={t('auth.signUp.submit')}
           onPress={handleSubmit(handleSignUp)}
-          disabled={fetchStatus === 'fetching'}
+          disabled={fetchStatus === 'fetching' || !privacyAgreed}
         />
 
         <Link href="/(auth)/sign-in" className="text-center text-muted-foreground">
           {t('auth.signUp.hasAccount')}<Text className="text-primary">{t('auth.signUp.signInLink')}</Text>
         </Link>
       </View>
+
+      <PrivacyModal
+        visible={privacyModalVisible}
+        onClose={() => setPrivacyModalVisible(false)}
+        webUrl={privacyUrl}
+      />
     </KeyboardAvoidingView>
   );
 }

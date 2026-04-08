@@ -1,0 +1,222 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "error": "An error occurred",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "back": "← Back",
+    "saving": "Saving…",
+    "notFound": "Not found",
+    "privacy": "Privacy"
+  },
+  "auth": {
+    "signUp": {
+      "agreePrefix": "I agree to the",
+      "privacyPolicy": "Privacy Policy"
+    }
+  },
+  "home": {
+    "greeting": "Good day,",
+    "greetingUser": "Hey {name} 👋",
+    "browseCollection": "Browse your collection",
+    "manageList": "Manage your list",
+    "addRecipe": "Add recipe"
+  },
+  "recipes": {
+    "title": "Recipes",
+    "new": "New",
+    "newRecipe": "New recipe",
+    "editRecipe": "Edit recipe",
+    "createRecipe": "Create recipe",
+    "saveChanges": "Save changes",
+    "saveRecipe": "Save recipe",
+    "notFound": "Recipe not found",
+    "loadError": "Failed to load recipes",
+    "loadOneError": "Failed to load recipe",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "addToShopping": "Add to shopping list",
+    "adding": "Adding…",
+    "added": "Added!",
+    "addToList": "Add to list",
+    "timeMinutes": "{time} min",
+    "empty": {
+      "title": "No recipes yet",
+      "subtitle": "Add your first recipe to get started"
+    },
+    "difficulty": {
+      "label": "Difficulty",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "form": {
+      "name": "Recipe name *",
+      "namePlaceholder": "e.g., Creamy tomato soup",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of the recipe...",
+      "time": "Time (min)",
+      "tags": "Tags",
+      "ingredients": "Ingredients *",
+      "ingredient": "Ingredient",
+      "qty": "Quantity",
+      "addIngredient": "Add ingredient",
+      "addSubtitle": "Add section title",
+      "subtitlePlaceholder": "Section title",
+      "stepPlaceholder": "Step {step}…",
+      "addStep": "Add step",
+      "pasteFromClipboard": "Paste from clipboard"
+    },
+    "selectIngredients": "Select ingredients",
+    "addSelected": "Add selected"
+  },
+  "shopping": {
+    "title": "Shopping List",
+    "addPlaceholder": "Add item…",
+    "qtyPlaceholder": "Quantity (optional)",
+    "unitOptional": "Unit (optional)",
+    "noUnit": "No unit",
+    "done": "Done ({count})",
+    "clearAll": "Clear all",
+    "loadError": "Failed to load list",
+    "newList": "New list",
+    "listNamePlaceholder": "List name",
+    "createList": "Create list",
+    "renameList": "Edit name",
+    "deleteList": "Delete list",
+    "deleteConfirm": "Are you sure you want to delete this list?",
+    "invite": "Invite people",
+    "inviteLinkCopied": "Invite link copied!",
+    "save": "Save",
+    "members": "{count} members",
+    "empty": {
+      "title": "List is empty",
+      "subtitle": "Add items above or from a recipe"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "recipes": "Recipes",
+    "shopping": "Shopping",
+    "collections": "Collections"
+  },
+  "privacyRecipe": {
+    "public": "Public",
+    "private": "Private",
+    "shareLink": "Copy link",
+    "linkCopied": "Link copied!",
+    "privateWarning": "Recipe is private — others cannot open this link",
+    "isPrivateRecipe": "This recipe is private",
+    "copyToCollection": "Copy to my collection",
+    "copiedToCollection": "Added to your collection!"
+  },
+  "collections": {
+    "title": "Collections",
+    "new": "New collection",
+    "name": "Collection name",
+    "addToCollection": "Add to collection",
+    "removeFromCollection": "Remove from collection",
+    "deleteCollection": "Delete collection",
+    "recipeCount": "{count} recipes",
+    "empty": {
+      "title": "No collections yet",
+      "subtitle": "Create your first collection"
+    },
+    "emptyCollection": {
+      "title": "Collection is empty",
+      "subtitle": "Add recipes from the recipe page"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "email": "Email",
+    "deleteAccount": "Delete account"
+  },
+  "deleteAccount": {
+    "title": "Delete account",
+    "warning": "This action is permanent. All your data will be deleted permanently.",
+    "whatGetsDeleted": "The following data will be deleted:",
+    "item_recipes": "All your recipes",
+    "item_collections": "All your collections",
+    "item_shoppingLists": "All your shopping lists",
+    "confirmEmail": "Type your email address to confirm",
+    "confirmCheck": "I understand this action is permanent and cannot be undone",
+    "submit": "Delete my account permanently",
+    "submitting": "Deleting…",
+    "error": "An error occurred. Please try again.",
+    "deleted": "Your account has been deleted successfully."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "back": "Back to home",
+    "lastUpdated": "Last updated",
+    "lastUpdatedDate": "April 8, 2026",
+    "section": {
+      "introduction": {
+        "title": "Introduction",
+        "content": "Recipe App (\"we\", \"us\", \"our\", or the \"Service\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your personal data when you use our web application. We comply with the General Data Protection Regulation (GDPR) and other applicable privacy laws."
+      },
+      "dataCollected": {
+        "title": "What Data We Collect",
+        "authentication": {
+          "title": "Authentication Data",
+          "content": "When you sign up or log in, your email address and authentication information are collected by Clerk (our authentication provider). We receive only your user ID from Clerk — we do not store passwords or sensitive authentication details. Clerk is responsible for secure password management."
+        },
+        "recipes": {
+          "title": "Recipes and Cooking Data",
+          "content": "When you create recipes, we store: recipe title, description, difficulty level, cooking time, ingredients, instructions, and any tags you assign. This data is stored in Supabase (our database provider) and is associated with your user ID."
+        },
+        "shoppingLists": {
+          "title": "Shopping Lists",
+          "content": "We store shopping lists you create, including item names, quantities, units, and checked status. You can also invite others to collaborate on lists — we store their user IDs as list members."
+        }
+      },
+      "legalBasis": {
+        "title": "Legal Basis for Processing",
+        "content": "We process your personal data based on your consent (GDPR Article 6(1)(a)). By using the Service, you consent to this Privacy Policy. You may withdraw consent at any time by deleting your account."
+      },
+      "thirdParty": {
+        "title": "Third-Party Services",
+        "clerk": "Clerk (clerk.com) handles user authentication, sign-up, and account management. Clerk is GDPR-compliant and their Privacy Policy governs how they handle authentication data. Visit clerk.com/privacy for details.",
+        "supabase": "Supabase (supabase.com) hosts our PostgreSQL database in the EU, ensuring GDPR compliance. Your recipes, shopping lists, and account associations are stored there. Supabase's Privacy Policy and Data Processing Agreement govern their role. Visit supabase.com/privacy for details.",
+        "future": {
+          "title": "Future Services",
+          "content": "We may add error monitoring (e.g., Sentry) in the future to improve reliability. Any new services will be GDPR-compliant, and this Privacy Policy will be updated accordingly."
+        }
+      },
+      "retention": {
+        "title": "Data Retention",
+        "content": "When you delete your account, all your personal data is deleted immediately from our systems (recipes, shopping lists, collections). Clerk and Supabase also delete their copies per their retention policies. No backups of your data are kept beyond standard infrastructure redundancy (typically 7-30 days)."
+      },
+      "rights": {
+        "title": "Your Rights Under GDPR",
+        "access": "Right to access: You can request all personal data we hold about you.",
+        "rectification": "Right to rectification: You can correct inaccurate data.",
+        "erasure": "Right to erasure (\"right to be forgotten\"): You can request deletion of your account and data by going to Settings → Delete Account.",
+        "restriction": "Right to restrict processing: You can request we limit how we use your data.",
+        "portability": "Right to data portability: You can request your data in a portable format.",
+        "objection": "Right to object: You can object to processing of your data (though limited by our legitimate interests)."
+      },
+      "exerciseRights": {
+        "title": "How to Exercise Your Rights",
+        "content": "To exercise any of these rights, contact us via email. Please include your user ID and the specific right you wish to exercise. We will respond within 30 days (as required by GDPR). You can also delete your account directly via the Settings page.",
+        "email": "Contact email"
+      },
+      "security": {
+        "title": "Data Security",
+        "content": "We use industry-standard security measures: all data is transmitted over HTTPS, passwords are managed by Clerk (hashed and salted), and database access is restricted to authenticated users. However, no system is 100% secure. We recommend using a strong, unique password and enabling two-factor authentication (2FA) in your Clerk account."
+      },
+      "changes": {
+        "title": "Changes to This Policy",
+        "content": "We may update this Privacy Policy periodically. Material changes will be communicated via email. Your continued use of the Service after changes constitutes acceptance of the updated policy."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "name": "Data Controller",
+        "email": "Email address"
+      }
+    }
+  }
+}

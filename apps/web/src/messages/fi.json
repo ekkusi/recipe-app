@@ -7,7 +7,14 @@
     "edit": "Muokkaa",
     "back": "← Takaisin",
     "saving": "Tallennetaan…",
-    "notFound": "Ei löydy"
+    "notFound": "Ei löydy",
+    "privacy": "Tietosuoja"
+  },
+  "auth": {
+    "signUp": {
+      "agreePrefix": "Hyväksyn",
+      "privacyPolicy": "tietosuojakaaavan"
+    }
   },
   "home": {
     "greeting": "Hyvää päivää,",
@@ -94,7 +101,7 @@
     "shopping": "Ostoslista",
     "collections": "Kokoelmat"
   },
-  "privacy": {
+  "privacyRecipe": {
     "public": "Julkinen",
     "private": "Yksityinen",
     "shareLink": "Kopioi linkki",
@@ -140,5 +147,76 @@
     "submitting": "Poistetaan…",
     "error": "Tapahtui virhe. Yritä uudelleen.",
     "deleted": "Tilisi on poistettu onnistuneesti."
+  },
+  "privacy": {
+    "title": "Tietosuojakaava",
+    "back": "Takaisin kotisivulle",
+    "lastUpdated": "Päivitetty viimeksi",
+    "lastUpdatedDate": "8. huhtikuuta 2026",
+    "section": {
+      "introduction": {
+        "title": "Johdanto",
+        "content": "Recipe App (\"me\", \"meidän\", \"palvelu\") on sitoutunut suojelemaan yksityisyyttäsi. Tämä tietosuojakaava selittää, kuinka keräämme, käytämme ja suojelemme henkilötietojasi käyttäessäsi verkkosovellustamme. Noudatamme yleistä tietosuoja-asetusta (GDPR) ja muita sovellettavia tietosuojalakeja."
+      },
+      "dataCollected": {
+        "title": "Mitä tietoja keräämme",
+        "authentication": {
+          "title": "Todennustiedot",
+          "content": "Kun kirjaudut sisään tai luot tilin, sähköpostiosoitteesi ja todennustiedot kerää Clerk (palvelun todentuspalvelun tarjoaja). Vastaanota vain käyttäjätunnuksesi Clerkiltä — emme tallenna salasanoja tai herkkiä todennustietoja. Clerk on vastuussa turvallisen salasanojen hallinnan."
+        },
+        "recipes": {
+          "title": "Reseptit ja ruoanlaittodata",
+          "content": "Kun luot reseptejä, tallennisimme: reseptin nimen, kuvauksen, vaikeustason, keittoajan, ainesosat, ohjeet ja mahdolliset tagit. Nämä tiedot tallennetaan Supabaseen (palvelun tietokantaan) ja liitetään käyttäjätunnuksellesi."
+        },
+        "shoppingLists": {
+          "title": "Ostoslistat",
+          "content": "Tallennisimme luomasi ostoslistat, mukaan lukien tuotteiden nimet, määrät, yksiköt ja merkintätila. Voit myös kutsua muita tekemään yhteistyötä listojen kanssa — tallennisimme heidän käyttäjätunnuksensa."
+        }
+      },
+      "legalBasis": {
+        "title": "Käsittelyn oikeusperusta",
+        "content": "Käsittelemme henkilötietojasi suostumuksella (GDPR 6. artikla 1 kohdan a alakohta). Käyttämällä palvelua hyväksyt tämän tietosuojakaaavan. Voit peruuttaa suostumuksen poistamalla tilisi milloin tahansa."
+      },
+      "thirdParty": {
+        "title": "Kolmannen osapuolen palvelut",
+        "clerk": "Clerk (clerk.com) hallinnoi käyttäjien todentamista, rekisteröitymistä ja tilin hallintaa. Clerk on GDPR-yhteensopiva ja heidän tietosuojakaavansa hallitsee heidän todennustietojen käsittelyä. Katso clerk.com/privacy tarkemmat tiedot.",
+        "supabase": "Supabase (supabase.com) isännöi PostgreSQL-tietokantaamme EU:ssa GDPR-yhteensopivuuden varmistamiseksi. Reseptisi, ostoslistasi ja tilin yhdistykset tallennetaan sinne. Supabasen tietosuojakaava ja tietojen käsittelyä koskeva sopimus hallitsevat heidän roolia. Katso supabase.com/privacy tarkemmat tiedot.",
+        "future": {
+          "title": "Tulevaisuuden palvelut",
+          "content": "Saatamme lisätä virheiden seurantaa (esim. Sentry) tulevaisuudessa luotettavuuden parantamiseksi. Kaikki uudet palvelut ovat GDPR-yhteensopivia ja tämä tietosuojakaava päivitetään sen mukaisesti."
+        }
+      },
+      "retention": {
+        "title": "Tietojen säilyttäminen",
+        "content": "Kun poistat tilisi, kaikki henkilötietosi poistetaan välittömästi järjestelmistämme (reseptit, ostoslistat, kokoelmat). Clerk ja Supabase poistavat myös heidän kopionsa omien säilytyskäytäntöjen mukaan. Tietojen varmuuskopioita ei säilytetä perusinfrastruktuuri-redundanssin (tyypillisesti 7–30 päivää) ulkopuolella."
+      },
+      "rights": {
+        "title": "Oikeutesi GDPR:n mukaisesti",
+        "access": "Tiedonsaantioikeus: Voit pyytää kaikkia henkilötietoja, joita meillä on sinusta.",
+        "rectification": "Oikaisu-oikeus: Voit korjata epätarkkoja tietoja.",
+        "erasure": "Poisto-oikeus (\"oikeus unohtaa\"): Voit pyytää tilisi ja tietojen poistamista menemällä Asetukset → Poista tili.",
+        "restriction": "Käsittelyn rajoittamisen oikeus: Voit pyytää rajoittamaan tietojesi käyttöä.",
+        "portability": "Tietojen siirrettävyyden oikeus: Voit pyytää tietojasi siirrettävässä muodossa.",
+        "objection": "Vastustamisen oikeus: Voit vastustaa henkilötietojesi käsittelyä (vaikka rajoituksilla)."
+      },
+      "exerciseRights": {
+        "title": "Kuinka käyttää oikeuksiasi",
+        "content": "Käyttääksesi näitä oikeuksia ota meihin yhteyttä sähköpostitse. Lisää käyttäjätunnuksesi ja erityinen oikeus, jota haluat käyttää. Vastaamme 30 päivän kuluessa (kuten GDPR vaatii). Voit myös poistaa tilisi suoraan Asetukset-sivulla.",
+        "email": "Yhteystiedon sähköposti"
+      },
+      "security": {
+        "title": "Tietoturva",
+        "content": "Käytämme teollisuuden standardin mukaisia turvatoimia: kaikki tiedot siirretään HTTPS:n yli, salasanat hallinnoi Clerk (hajautettu ja suolattu), ja tietokantaan pääsy on rajoitettu todentautuneille käyttäjille. Mikään järjestelmä ei ole kuitenkaan 100% turvallinen. Suosittelemme käyttämään vahvaa, ainutlaatuista salasanaa ja ottamaan kaksivaiheisen todennuksen (2FA) käyttöön Clerk-tilissäsi."
+      },
+      "changes": {
+        "title": "Muutokset tähän kaavaan",
+        "content": "Saatamme päivittää tätä tietosuojakaavaa säännöllisesti. Merkittävistä muutoksista ilmoitetaan sähköpostilla. Palvelun jatkaminen muutosten jälkeen merkitsee päivitetyn kaavan hyväksymistä."
+      },
+      "contact": {
+        "title": "Ota yhteyttä",
+        "name": "Tietojen rekisterinpitäjä",
+        "email": "Sähköpostiosoite"
+      }
+    }
   }
 }
