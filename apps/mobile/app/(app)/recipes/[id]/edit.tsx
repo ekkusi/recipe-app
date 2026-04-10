@@ -94,10 +94,11 @@ export default function EditRecipeScreen() {
         initialValues={initialValues}
         tags={tags}
         onSubmit={(values) => {
-          updateMutation.mutateAsync(values)
+          updateMutation.mutate(values)
         }}
         submitLabel={t('recipes.saveChanges')}
         onCancel={() => router.back()}
+        isSubmitting={updateMutation.isPending}
       />
     </KeyboardAvoidingView>
   );

@@ -66,6 +66,15 @@ Tables: `recipes`, `recipe_ingredients`, `recipe_instructions`, `tags`, `recipe_
 - `apps/web/.env.local` — Clerk + Supabase keys (copy from `.env.local.example`)
 - `apps/mobile/.env.local` — `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`, `EXPO_PUBLIC_API_BASE_URL`
 
+## Quality checks
+
+After implementing features or making changes, run TypeScript type-checking on the affected app(s):
+
+- **Web**: `npm run type-check` (in `apps/web/`) or `nx run web:type-check`
+- **Mobile**: `npm run type-check` (in `apps/mobile/`) or `nx run mobile:type-check`
+
+These commands run `tsc --noEmit` to catch type errors without emitting output files. Always run type-check before committing code that touches both apps.
+
 ## Other notable things
 
 - When installing packages to the mobile app, always use `npx expo install`

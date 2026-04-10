@@ -82,7 +82,10 @@
     "form_addStep": "+ Lisää vaihe",
     "form_pasteFromClipboard": "Liitä leikepöydältä",
     "selectIngredients": "Valitse ainesosat",
-    "addSelected": "Lisää valitut"
+    "addSelected": "Lisää valitut",
+    "share": "Jaa resepti",
+    "deleteRecipe": "Poista resepti",
+    "deleteConfirm": "Haluatko varmasti poistaa tämän reseptin?"
   },
   "shopping": {
     "title": "Ostoslista",
@@ -131,6 +134,8 @@
     "removeFromCollection": "Poista kokoelmasta",
     "recipeCount": "{{count}} reseptiä",
     "empty_title": "Ei kokoelmia vielä",
-    "empty_subtitle": "Lisää reseptejä kokoelmaan reseptin sivulta"
+    "empty_subtitle": "Lisää reseptejä kokoelmaan reseptin sivulta",
+    "deleteCollection": "Poista kokoelma",
+    "deleteConfirm": "Haluatko varmasti poistaa tämän kokoelman?"
   }
 }

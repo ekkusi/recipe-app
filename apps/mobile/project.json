@@ -38,6 +38,13 @@
         "command": "npm run expo-install",
         "cwd": "apps/mobile"
       }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run type-check",
+        "cwd": "apps/mobile"
+      }
     }
   }
 }

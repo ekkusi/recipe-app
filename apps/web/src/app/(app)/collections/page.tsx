@@ -42,6 +42,7 @@ export default function CollectionsPage() {
   }
 
   async function handleDelete(id: string) {
+    if (!window.confirm(t("deleteConfirm"))) return;
     await fetch(`/api/collections/${id}`, { method: "DELETE" });
     setCollections((prev) => prev.filter((c) => c.id !== id));
   }

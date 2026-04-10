@@ -3,10 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { apiFetch } from '../../../lib/api';
+import { ConfirmationDialog } from '../../../components/ui/ConfirmationDialog';
 
 type Collection = { id: string; name: string; collection_recipes: { recipe_id: string }[] };
 
@@ -16,6 +17,8 @@ export default function CollectionsScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [newName, setNewName] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null);
 
   const { data: collections = [], isLoading } = useQuery({
     queryKey: ['collections'],
@@ -89,13 +92,38 @@ export default function CollectionsScreen() {
                   {t('collections.recipeCount', { count: item.collection_recipes?.length ?? 0 })}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => deleteMutation.mutate(item.id)} hitSlop={8}>
+              <TouchableOpacity
+                onPress={() => {
+                  setCollectionToDelete(item.id);
+                  setDeleteConfirmOpen(true);
+                }}
+                hitSlop={8}
+              >
                 <Text className="text-muted-foreground text-xl px-1">×</Text>
               </TouchableOpacity>
             </Pressable>
           )}
         />
       )}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmationDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setCollectionToDelete(null);
+        }}
+        title={t('collections.deleteCollection')}
+        message={t('collections.deleteConfirm')}
+        confirmLabel={t('collections.deleteCollection')}
+        cancelLabel={t('common.cancel')}
+        isDestructive
+        onConfirm={() => {
+          if (collectionToDelete) {
+            deleteMutation.mutate(collectionToDelete);
+          }
+        }}
+      />
     </View>
   );
 }

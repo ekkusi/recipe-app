@@ -1,10 +1,12 @@
 import { useAuth } from '@clerk/expo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ShoppingItem, ShoppingList } from '@recipe-app/shared';
+import { getUnitLabel } from '@recipe-app/shared';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
+  AppState,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -19,10 +21,11 @@ import {
 
 import { apiFetch } from '../../../lib/api';
 import { UnitPicker } from '../../../components/ui/UnitPicker';
+import { DropdownMenu, type DropdownMenuOption } from '../../../components/ui/DropdownMenu';
 import { supabase } from '../../../lib/supabase';
 import { getActiveListId, setActiveListId as persistActiveListId } from '../../../lib/active-shopping-list';
 import Sortable from 'react-native-sortables';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -77,6 +80,7 @@ export default function ShoppingListScreen() {
     queryKey: ['shopping-list-items', resolvedListId],
     queryFn: () => apiFetch<ShoppingItem[]>(`/api/shopping-lists/${resolvedListId}`, getToken),
     enabled: !!resolvedListId,
+    refetchOnMount: 'always',
   });
 
   // Realtime subscription — surgical in-place updates to preserve order
@@ -124,6 +128,16 @@ export default function ShoppingListScreen() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [resolvedListId]);
+
+  // Refetch when app comes to foreground
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active' && resolvedListId) {
+        queryClient.invalidateQueries({ queryKey: ['shopping-list-items', resolvedListId] });
+      }
+    });
+    return () => sub.remove();
+  }, [resolvedListId, queryClient]);
 
   const addMutation = useMutation({
     mutationFn: (data: { name: string; quantity: string | null; unit: string | null }) =>
@@ -336,7 +350,7 @@ export default function ShoppingListScreen() {
         </TouchableOpacity>
         {activeList && (
           <TouchableOpacity onPress={() => setMenuOpen(true)} className="p-2">
-            <Text className="text-2xl text-muted-foreground">⋯</Text>
+            <MaterialCommunityIcons name="dots-vertical" size={24} color="#5c4f44" />
           </TouchableOpacity>
         )}
       </View>
@@ -463,37 +477,40 @@ export default function ShoppingListScreen() {
       </ScrollView>
 
       {/* Dropdown menu */}
-      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
-        <Pressable className="flex-1" onPress={() => setMenuOpen(false)}>
-          <View
-            style={{ position: 'absolute', top: 108, right: 12, minWidth: 180,
-              shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 }}
-            className="bg-background border border-border rounded-2xl overflow-hidden"
-          >
-            <TouchableOpacity
-              onPress={() => { setMenuOpen(false); setRenameName(activeList?.name ?? ''); setRenameOpen(true); }}
-              className="px-4 py-3.5 border-b border-border active:bg-muted/50"
-            >
-              <Text className="text-foreground text-base">{t('shopping.renameList')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleInvite}
-              className="px-4 py-3.5 border-b border-border active:bg-muted/50"
-            >
-              <Text className="text-foreground text-base">{t('shopping.invite')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleDeleteList}
-              className="px-4 py-3.5 active:bg-muted/50"
-            >
-              <Text className="text-destructive text-base">{t('shopping.deleteList')}</Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </Modal>
+      <DropdownMenu
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        options={[
+          {
+            id: 'rename',
+            label: t('shopping.renameList'),
+            icon: 'pencil-outline',
+            iconType: 'material-community',
+            onPress: () => {
+              setRenameName(activeList?.name ?? '');
+              setRenameOpen(true);
+            },
+          },
+          {
+            id: 'invite',
+            label: t('shopping.invite'),
+            icon: 'share-variant-outline',
+            iconType: 'material-community',
+            onPress: handleInvite,
+          },
+          {
+            id: 'delete',
+            label: t('shopping.deleteList'),
+            icon: 'trash-can-outline',
+            iconType: 'material-community',
+            destructive: true,
+            onPress: handleDeleteList,
+          },
+        ]}
+      />
 
       {/* List picker modal */}
-      <Modal visible={listPickerOpen} transparent animationType="slide" onRequestClose={() => setListPickerOpen(false)}>
+      <Modal visible={listPickerOpen} transparent animationType="fade" onRequestClose={() => setListPickerOpen(false)}>
         <Pressable className="flex-1 bg-black/40 justify-end" onPress={() => setListPickerOpen(false)}>
           <Pressable>
             <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
@@ -656,7 +673,7 @@ function ShoppingItemRow({
             {item.name}
             {(item.quantity != null || item.unit) ? (
               <Text className="text-sm text-muted-foreground">
-                {'  '}{[item.quantity, item.unit].filter(Boolean).join(' ')}
+                {'  '}{[item.quantity, getUnitLabel(item.unit)].filter(Boolean).join(' ')}
               </Text>
             ) : null}
           </Text>

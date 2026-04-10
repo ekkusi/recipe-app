@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons"
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiFetch } from '../../../lib/api';
@@ -33,8 +34,8 @@ export default function CollectionDetailScreen() {
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom }}>
       <View className="px-4 pb-4 flex-row items-center gap-3">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-75">
-          <Text className="text-primary font-semibold">{t('common.back')}</Text>
+        <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/(app)')} hitSlop={8} className="active:opacity-75">
+          <Ionicons name="chevron-back" size={28} color="#b06060" />
         </Pressable>
         <Text className="text-xl font-bold text-foreground flex-1" numberOfLines={1}>
           {data?.name ?? t('common.loading')}

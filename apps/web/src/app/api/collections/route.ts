@@ -7,6 +7,8 @@ export async function GET() {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const collections = await getCollections(userId);
+  console.log("Collections", collections);
+
   return NextResponse.json(collections);
 }
 

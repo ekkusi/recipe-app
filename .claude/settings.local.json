@@ -40,7 +40,12 @@
       "Bash(find /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/shopping-lists/[listId] -type f -name *.ts -o -name *.tsx)",
       "Bash(find:*)",
       "Bash(ls -la /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/lib/db/account.ts /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/api/account/delete/route.ts /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/settings/page.tsx /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/settings/delete-account/page.tsx /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/web/src/app/\\\\\\(app\\\\\\)/settings/delete-account/delete-account-form.tsx)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(grep -n \"ing.unit\" /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/mobile/app/\\\\\\(app\\\\\\)/recipes/[id]/index.tsx)",
+      "Bash(grep:*)",
+      "Bash(grep -n \"collectionsOpen\" /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/mobile/app/\\\\\\(app\\\\\\)/recipes/[id]/index.tsx)",
+      "Bash(grep -n \"</ScrollView>\" /Users/ekeukko/Projects/BigBoyThings/recipe-app/apps/mobile/app/\\\\\\(app\\\\\\)/recipes/[id]/index.tsx)",
+      "Bash(npm run:*)"
     ]
   }
 }

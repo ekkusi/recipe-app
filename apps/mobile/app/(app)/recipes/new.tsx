@@ -53,10 +53,11 @@ export default function NewRecipeScreen() {
       <RecipeForm
         tags={tags}
         onSubmit={(values) => {
-          createMutation.mutateAsync(values)
+          createMutation.mutate(values)
         }}
         submitLabel={t('recipes.createRecipe')}
         onCancel={() => router.back()}
+        isSubmitting={createMutation.isPending}
       />
     </KeyboardAvoidingView>
   );

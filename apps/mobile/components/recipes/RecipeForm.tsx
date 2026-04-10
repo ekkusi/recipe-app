@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Tag } from '@recipe-app/shared';
 import { recipeFormSchema, type RecipeFormSchema, parseIngredientLine } from '@recipe-app/shared';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
 import { UnitPicker } from '../ui/UnitPicker';
@@ -17,6 +17,7 @@ interface RecipeFormProps {
   onSubmit: (values: RecipeFormSchema) => Promise<void> | void;
   submitLabel?: string;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
@@ -29,6 +30,7 @@ export function RecipeForm({
   onSubmit,
   submitLabel,
   onCancel,
+  isSubmitting
 }: RecipeFormProps) {
   const { t } = useTranslation();
   const ingredientNameRefs = useRef<(TextInput | null)[]>([]);
@@ -39,7 +41,7 @@ export function RecipeForm({
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RecipeFormSchema>({
     resolver: zodResolver(recipeFormSchema),
     defaultValues: {
@@ -62,6 +64,7 @@ export function RecipeForm({
     fields: ingredientFields,
     append: appendIngredient,
     remove: removeIngredient,
+    update: updateIngredient,
   } = useFieldArray({ control, name: 'ingredients' });
 
   const {
@@ -77,7 +80,26 @@ export function RecipeForm({
   async function pasteIngredients() {
     const text = await Clipboard.getStringAsync();
     const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-    lines.forEach((line) => {
+    if (lines.length === 0) return;
+    const [firstLine, ...rest] = lines;
+    const firstParsed = parseIngredientLine(firstLine);
+    const lastField = ingredientFields[ingredientFields.length - 1];
+    if (ingredientFields.length === 1 && !lastField?.name && !lastField?.quantity) {
+      updateIngredient(0, {
+        name: firstParsed.name,
+        quantity: firstParsed.quantity,
+        unit: firstParsed.unit,
+        is_section_header: false,
+      });
+    } else {
+      appendIngredient({
+        name: firstParsed.name,
+        quantity: firstParsed.quantity,
+        unit: firstParsed.unit,
+        is_section_header: false,
+      });
+    }
+    rest.forEach((line) => {
       const parsed = parseIngredientLine(line);
       appendIngredient({
         name: parsed.name,
@@ -350,9 +372,10 @@ export function RecipeForm({
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-          className="flex-1 bg-primary rounded-2xl py-4 items-center active:opacity-75"
+          className="flex-1 bg-primary rounded-2xl py-4 items-center active:opacity-75 flex-row gap-2 justify-center"
           style={{ opacity: isSubmitting ? 0.5 : 1 }}
         >
+          {isSubmitting && <ActivityIndicator color="#faf7f0" size="small" />}
           <Text className="text-primary-foreground font-semibold">
             {isSubmitting ? t('common.saving') : (submitLabel ?? t('recipes.saveRecipe'))}
           </Text>

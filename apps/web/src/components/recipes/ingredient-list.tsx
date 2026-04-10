@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { getActiveListId } from "@/lib/active-shopping-list";
 import type { Ingredient } from "@recipe-app/shared";
+import { getUnitLabel } from "@recipe-app/shared";
 
 export function IngredientList({ ingredients }: { ingredients: Ingredient[] }) {
   const t = useTranslations("recipes");
@@ -59,7 +60,7 @@ export function IngredientList({ ingredients }: { ingredients: Ingredient[] }) {
               <span className="font-medium flex-1">{ing.name}</span>
               {(ing.quantity || ing.unit) && (
                 <span className="text-muted-foreground text-sm">
-                  {ing.quantity} {ing.unit}
+                  {ing.quantity} {getUnitLabel(ing.unit)}
                 </span>
               )}
               <button

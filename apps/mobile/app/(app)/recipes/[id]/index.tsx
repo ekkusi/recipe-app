@@ -2,12 +2,13 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '@clerk/expo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Recipe } from '@recipe-app/shared';
+import { getUnitLabel } from '@recipe-app/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
   Alert,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -21,6 +22,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiFetch } from '../../../../lib/api';
 import { getActiveListId } from '../../../../lib/active-shopping-list';
+import { Modal } from '../../../../components/ui/Modal';
+import { DropdownMenu, type DropdownMenuOption } from '../../../../components/ui/DropdownMenu';
+import { ConfirmationDialog } from '../../../../components/ui/ConfirmationDialog';
 
 type CollectionRow = { id: string; name: string; collection_recipes: { recipe_id: string }[] };
 
@@ -32,12 +36,15 @@ export default function RecipeDetailScreen() {
 
   const insets = useSafeAreaInsets();
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [collectionsLoading, setCollectionsLoading] = useState(false);
   const [collections, setCollections] = useState<CollectionRow[]>([]);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<Set<string>>(new Set());
   const [newCollectionName, setNewCollectionName] = useState('');
   const [shoppingAdded, setShoppingAdded] = useState(false);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [selectedIngredientIndices, setSelectedIngredientIndices] = useState<Set<number>>(new Set());
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const { data: recipe, isLoading, error, refetch } = useQuery({
     queryKey: ['recipe', id],
@@ -47,12 +54,15 @@ export default function RecipeDetailScreen() {
   const isOwner = recipe ? recipe.user_id === userId : false;
 
   async function openCollections() {
+    setCollections([]);
+    setCollectionsLoading(true);
+    setCollectionsOpen(true);
     const data = await apiFetch<CollectionRow[]>('/api/collections', getToken);
-    setCollections(data);
     setSelectedCollectionIds(
       new Set(data.filter((c) => c.collection_recipes.some((cr) => cr.recipe_id === id)).map((c) => c.id))
     );
-    setCollectionsOpen(true);
+    setCollections(data);
+    setCollectionsLoading(false);
   }
 
   async function toggleCollection(collectionId: string) {
@@ -102,7 +112,14 @@ export default function RecipeDetailScreen() {
 
   async function handleCopy() {
     const { id: newId } = await apiFetch<{ id: string }>(`/api/recipes/${id}/copy`, getToken, { method: 'POST' });
+    queryClient.invalidateQueries({ queryKey: ['recipes'] });
     router.replace(`/(app)/recipes/${newId}`);
+  }
+
+  async function performDelete() {
+    await apiFetch(`/api/recipes/${id}`, getToken, { method: 'DELETE' });
+    queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    router.canGoBack() ? router.back() : router.replace('/(app)');
   }
 
   const addToShoppingMutation = useMutation({
@@ -171,53 +188,38 @@ export default function RecipeDetailScreen() {
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom }}>
       {/* Header */}
       <View className="px-4 pb-4 flex-row items-center justify-between">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-75">
-          <Ionicons name="chevron-back" size={28} color="#b06060" />
-        </Pressable>
-        <View className="flex-row gap-1">
-          {isOwner && (
-            <>
-              <TouchableOpacity
-                onPress={handleShare}
-                hitSlop={8}
-                className="p-2 active:opacity-75"
-              >
-                <MaterialCommunityIcons name="share-variant-outline" size={22} color="#5c4f44" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={openCollections}
-                hitSlop={8}
-                className="p-2 active:opacity-75"
-              >
-                <Ionicons name="folder-outline" size={22} color="#5c4f44" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push(`/(app)/recipes/${id}/edit`)}
-                hitSlop={8}
-                className="p-2 active:opacity-75"
-              >
-                <MaterialCommunityIcons name="pencil-outline" size={22} color="#5c4f44" />
-              </TouchableOpacity>
-            </>
-          )}
-          {!isOwner && (
-            <TouchableOpacity
-              onPress={handleCopy}
-              hitSlop={8}
-              className="p-2 active:opacity-75"
-            >
-              <Ionicons name="copy-outline" size={22} color="#5c4f44" />
-            </TouchableOpacity>
-          )}
+        <View className="flex-row gap-4">
+          <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/(app)')} hitSlop={8} className="active:opacity-75">
+            <Ionicons name="chevron-back" size={28} color="#b06060" />
+          </Pressable>
+          {/* Title */}
+          <Text className="text-2xl font-bold text-foreground">{recipe.title}</Text>
+
         </View>
+        {isOwner && (
+          <TouchableOpacity
+            onPress={() => setMenuOpen(true)}
+            hitSlop={8}
+            className="p-2 active:opacity-75"
+          >
+            <MaterialCommunityIcons name="dots-vertical" size={22} color="#5c4f44" />
+          </TouchableOpacity>
+        )}
+        {!isOwner && (
+          <TouchableOpacity
+            onPress={handleCopy}
+            hitSlop={8}
+            className="p-2 active:opacity-75"
+          >
+            <Ionicons name="copy-outline" size={22} color="#5c4f44" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
       >
-        {/* Title */}
-        <Text className="text-2xl font-bold text-foreground mb-3">{recipe.title}</Text>
 
         {/* Meta badges */}
         <View className="flex-row flex-wrap gap-2 mb-4">
@@ -298,7 +300,7 @@ export default function RecipeDetailScreen() {
                     <Text className="font-medium text-foreground flex-1">{ing.name}</Text>
                     {(ing.quantity != null || ing.unit) && (
                       <Text className="text-sm text-muted-foreground mr-2">
-                        {[ing.quantity, ing.unit].filter(Boolean).join(' ')}
+                        {[ing.quantity, getUnitLabel(ing.unit)].filter(Boolean).join(' ')}
                       </Text>
                     )}
                     <TouchableOpacity
@@ -337,125 +339,165 @@ export default function RecipeDetailScreen() {
 
       {/* Bulk add modal */}
       <Modal
-        visible={bulkModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setBulkModalOpen(false)}
+        isOpen={bulkModalOpen}
+        placement="bottom"
+        onClose={() => setBulkModalOpen(false)}
+        title={t('recipes.selectIngredients')}
+        scrollable
       >
-        <Pressable
-          className="flex-1 bg-black/40 justify-end"
-          onPress={() => setBulkModalOpen(false)}
-        >
-          <Pressable>
-            <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
-              <Text className="font-bold text-lg mb-4 text-foreground">
-                {t('recipes.selectIngredients')}
-              </Text>
-              <ScrollView style={{ maxHeight: 320 }}>
-                {nonHeaderIngredients.map((ing, i) => {
-                  const selected = selectedIngredientIndices.has(i);
-                  return (
-                    <TouchableOpacity
-                      key={ing.id ?? i}
-                      onPress={() => toggleIngredientSelection(i)}
-                      className="flex-row items-center justify-between py-3 border-b border-border"
-                    >
-                      <Text className="flex-1 text-base text-foreground">{ing.name}</Text>
-                      {(ing.quantity != null || ing.unit) && (
-                        <Text className="text-sm text-muted-foreground mr-3">
-                          {[ing.quantity, ing.unit].filter(Boolean).join(' ')}
-                        </Text>
-                      )}
-                      <View
-                        className={`w-5 h-5 rounded border-2 items-center justify-center ${selected ? 'bg-primary border-primary' : 'border-border'}`}
-                      >
-                        {selected && <Text className="text-white text-xs font-bold">✓</Text>}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-              <TouchableOpacity
-                onPress={confirmBulkAdd}
-                disabled={selectedIngredientIndices.size === 0}
-                className="mt-4 bg-primary rounded-2xl py-4 items-center active:opacity-75"
-                style={{ opacity: selectedIngredientIndices.size === 0 ? 0.5 : 1 }}
-              >
-                <Text className="text-primary-foreground font-semibold">
-                  {t('recipes.addSelected')}
+        {nonHeaderIngredients.map((ing, i) => {
+          const selected = selectedIngredientIndices.has(i);
+          return (
+            <TouchableOpacity
+              key={ing.id ?? i}
+              onPress={() => toggleIngredientSelection(i)}
+              className="flex-row items-center justify-between py-3 border-b border-border"
+            >
+              <Text className="flex-1 text-base text-foreground">{ing.name}</Text>
+              {(ing.quantity != null || ing.unit) && (
+                <Text className="text-sm text-muted-foreground mr-3">
+                  {[ing.quantity, ing.unit].filter(Boolean).join(' ')}
                 </Text>
+              )}
+              <View
+                className={`w-5 h-5 rounded border-2 items-center justify-center ${selected ? 'bg-primary border-primary' : 'border-border'}`}
+              >
+                {selected && <Text className="text-white text-xs font-bold">✓</Text>}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+        <TouchableOpacity
+          onPress={confirmBulkAdd}
+          disabled={selectedIngredientIndices.size === 0}
+          className="mt-4 bg-primary rounded-2xl py-4 items-center active:opacity-75"
+          style={{ opacity: selectedIngredientIndices.size === 0 ? 0.5 : 1 }}
+        >
+          <Text className="text-primary-foreground font-semibold">
+            {t('recipes.addSelected')}
+          </Text>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Collections modal */}
+      <Modal
+        title={t('collections.addToCollection')}
+        isOpen={collectionsOpen}
+        placement="bottom"
+        onClose={() => setCollectionsOpen(false)}
+        scrollable
+      >
+        {collectionsLoading && (
+          <View className="flex-1 items-center justify-center py-8">
+            <ActivityIndicator size="large" color="#b06060" />
+          </View>
+        )}
+        {!collectionsLoading && (
+          <>
+            <ScrollView style={{ maxHeight: 320 }} keyboardShouldPersistTaps="handled">
+              {collections.length === 0 && (
+                <Text className="text-muted-foreground text-sm mb-2">
+                  {t('collections.empty_title')}
+                </Text>
+              )}
+              {collections.map((col) => {
+                const selected = selectedCollectionIds.has(col.id);
+                return (
+                  <TouchableOpacity
+                    key={col.id}
+                    onPress={() => toggleCollection(col.id)}
+                    className="flex-row items-center justify-between py-3 border-b border-border"
+                  >
+                    <Text className="text-base text-foreground">{col.name}</Text>
+                    <View
+                      className={`w-5 h-5 rounded border-2 items-center justify-center ${selected ? 'bg-primary border-primary' : 'border-border'
+                        }`}
+                    >
+                      {selected && <Text className="text-white text-xs font-bold">✓</Text>}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+
+            <View className="flex-row gap-2 mt-4">
+              <TextInput
+                className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-foreground"
+                placeholder={t('collections.name')}
+                placeholderTextColor="#8a7a68"
+                value={newCollectionName}
+                onChangeText={setNewCollectionName}
+                onSubmitEditing={createAndAddCollection}
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                onPress={createAndAddCollection}
+                disabled={!newCollectionName.trim()}
+                className="bg-primary rounded-xl w-12 items-center justify-center"
+                style={{ opacity: !newCollectionName.trim() ? 0.5 : 1 }}
+              >
+                <Text className="text-primary-foreground text-xl font-bold">+</Text>
               </TouchableOpacity>
             </View>
-          </Pressable>
-        </Pressable>
+
+          </>
+        )}
       </Modal>
 
-      {/* Collections bottom sheet */}
-      <Modal
-        visible={collectionsOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setCollectionsOpen(false)}
-      >
-        <Pressable
-          className="flex-1 bg-black/40 justify-end"
-          onPress={() => setCollectionsOpen(false)}
-        >
-          <Pressable>
-            <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
-              <Text className="font-bold text-lg mb-4 text-foreground">
-                {t('collections.addToCollection')}
-              </Text>
-              <ScrollView style={{ maxHeight: 320 }} keyboardShouldPersistTaps="handled">
-                {collections.length === 0 && (
-                  <Text className="text-muted-foreground text-sm mb-2">
-                    {t('collections.empty_title')}
-                  </Text>
-                )}
-                {collections.map((col) => {
-                  const selected = selectedCollectionIds.has(col.id);
-                  return (
-                    <TouchableOpacity
-                      key={col.id}
-                      onPress={() => toggleCollection(col.id)}
-                      className="flex-row items-center justify-between py-3 border-b border-border"
-                    >
-                      <Text className="text-base text-foreground">{col.name}</Text>
-                      <View
-                        className={`w-5 h-5 rounded border-2 items-center justify-center ${selected ? 'bg-primary border-primary' : 'border-border'
-                          }`}
-                      >
-                        {selected && <Text className="text-white text-xs font-bold">✓</Text>}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
+      {/* Menu dropdown */}
+      {isOwner && (
+        <DropdownMenu
+          visible={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          options={[
+            {
+              id: 'share',
+              label: t('recipes.share'),
+              icon: 'share-variant-outline',
+              iconType: 'material-community',
+              onPress: handleShare,
+            },
+            {
+              id: 'collections',
+              label: t('collections.addToCollection'),
+              icon: 'folder-outline',
+              iconType: 'ionicons',
+              onPress: openCollections,
+            },
+            {
+              id: 'edit',
+              label: t('common.edit'),
+              icon: 'pencil-outline',
+              iconType: 'material-community',
+              onPress: () => router.push(`/(app)/recipes/${id}/edit`),
+            },
+            {
+              id: 'delete',
+              label: t('recipes.deleteRecipe'),
+              icon: 'trash-can-outline',
+              iconType: 'material-community',
+              destructive: true,
+              onPress: () => setDeleteConfirmOpen(true),
+            },
+          ]}
+        />
+      )}
 
-              {/* New collection input */}
-              <View className="flex-row gap-2 mt-4">
-                <TextInput
-                  className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-foreground"
-                  placeholder={t('collections.name')}
-                  placeholderTextColor="#8a7a68"
-                  value={newCollectionName}
-                  onChangeText={setNewCollectionName}
-                  onSubmitEditing={createAndAddCollection}
-                  returnKeyType="done"
-                />
-                <TouchableOpacity
-                  onPress={createAndAddCollection}
-                  disabled={!newCollectionName.trim()}
-                  className="bg-primary rounded-xl w-12 items-center justify-center"
-                  style={{ opacity: !newCollectionName.trim() ? 0.5 : 1 }}
-                >
-                  <Text className="text-primary-foreground text-xl font-bold">+</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      {/* Delete confirmation dialog */}
+      <ConfirmationDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setMenuOpen(false);
+        }}
+        title={t('recipes.deleteRecipe')}
+        message={t('recipes.deleteConfirm')}
+        confirmLabel={t('recipes.deleteRecipe')}
+        cancelLabel={t('common.cancel')}
+        isDestructive
+        onConfirm={performDelete}
+      />
     </View>
   );
 }

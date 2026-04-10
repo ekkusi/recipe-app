@@ -12,6 +12,7 @@ import { IngredientList } from "@/components/recipes/ingredient-list";
 import { ShareRecipeButton } from "@/components/recipes/share-recipe-button";
 import { CopyRecipeButton } from "@/components/recipes/copy-recipe-button";
 import { AddToCollectionButton } from "@/components/recipes/add-to-collection-button";
+import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 
 export default async function RecipePage({
   params,
@@ -51,15 +52,18 @@ export default async function RecipePage({
         title={recipe.title}
         action={
           isOwner ? (
-            <Button
-              render={<Link href={`/recipes/${id}/edit`} />}
-              nativeButton={false}
-              variant="ghost"
-              size="icon"
-              className="rounded-xl"
-            >
-              <Pencil size={18} />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                render={<Link href={`/recipes/${id}/edit`} />}
+                nativeButton={false}
+                variant="ghost"
+                size="icon"
+                className="rounded-xl"
+              >
+                <Pencil size={18} />
+              </Button>
+              <DeleteRecipeButton recipeId={id} />
+            </div>
           ) : undefined
         }
       />

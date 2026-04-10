@@ -3,6 +3,7 @@
 import { GripVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getUnitLabel } from "@recipe-app/shared";
 
 interface ShoppingItemProps {
   id: string;
@@ -72,7 +73,7 @@ export function ShoppingItem({
         </span>
         {(quantity || unit) && (
           <span className="text-sm text-muted-foreground ml-2">
-            {quantity} {unit}
+            {quantity} {getUnitLabel(unit)}
           </span>
         )}
       </div>

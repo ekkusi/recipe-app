@@ -15,3 +15,8 @@ export const UNITS = [
 ] as const;
 
 export type Unit = (typeof UNITS)[number]["value"];
+
+export function getUnitLabel(value: string | null | undefined): string {
+  if (!value) return '';
+  return UNITS.find((u) => u.value === value)?.label ?? value;
+}

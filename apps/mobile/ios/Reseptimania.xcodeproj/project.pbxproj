@@ -21,6 +21,8 @@
 		5C01B40FE0B449CAA563CC18 = {isa = PBXBuildFile; fileRef = 01F7D62EE56D4CC4B56CE152 /* ClerkViewFactory.swift */; };
 		C133B75A98DC4B85BF5DEA98 = {isa = PBXBuildFile; fileRef = D09D8EBDA7CF4F57B9D8A664 /* ClerkViewFactory.swift */; };
 		A380311A7B294E548C03CB06 = {isa = PBXBuildFile; fileRef = 57423F86F1DB4B5CB69A67B3 /* ClerkViewFactory.swift */; };
+		754A1CD69AB740D6B9515546 = {isa = PBXBuildFile; fileRef = 5307428A6EB24A5B857A120C /* ClerkViewFactory.swift */; };
+		DA683678A973498CA54B8738 = {isa = PBXBuildFile; fileRef = 17BC8CC20F6F46AD961DAF2F /* ClerkViewFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +46,8 @@
 		01F7D62EE56D4CC4B56CE152 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 		D09D8EBDA7CF4F57B9D8A664 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 		57423F86F1DB4B5CB69A67B3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
+		5307428A6EB24A5B857A120C = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
+		17BC8CC20F6F46AD961DAF2F = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ClerkViewFactory.swift; path = Reseptimania/ClerkViewFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,8 @@
 				01F7D62EE56D4CC4B56CE152 /* ClerkViewFactory.swift */,
 				D09D8EBDA7CF4F57B9D8A664 /* ClerkViewFactory.swift */,
 				57423F86F1DB4B5CB69A67B3 /* ClerkViewFactory.swift */,
+				5307428A6EB24A5B857A120C /* ClerkViewFactory.swift */,
+				17BC8CC20F6F46AD961DAF2F /* ClerkViewFactory.swift */,
 			);
 			name = Reseptimania;
 			sourceTree = "<group>";
@@ -168,6 +174,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
 				E5E59296467FF65C3D42ED9A /* [CP] Embed Pods Frameworks */,
+				0C8BFB8D372543EC8E3162B5 /* [Expo Dev Launcher] Strip Local Network Keys for Release */,
 			);
 			buildRules = (
 			);
@@ -189,6 +196,10 @@
 				4151FDF143394E04A34CF207 /* ClerkKitUI */,
 				D293991AA28A47CA89ECBB0C /* ClerkKit */,
 				092D7869450B401BB3C36F72 /* ClerkKitUI */,
+				F1BFB7A12A854FAB9F66034F /* ClerkKit */,
+				05357135F2F644719AA06200 /* ClerkKitUI */,
+				5F0E50B2501C40A4A550AC17 /* ClerkKit */,
+				AD03D8648B1C43F7B0E35AEB /* ClerkKitUI */,
 			);
 			productName = Reseptimania;
 			productReference = 13B07F961A680F5B00A75B9A /* Reseptimania.app */;
@@ -371,6 +382,54 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Reseptimania/Pods-Reseptimania-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		0C8BFB8D372543EC8E3162B5 /* [Expo Dev Launcher] Strip Local Network Keys for Release */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "[Expo Dev Launcher] Strip Local Network Keys for Release";
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "# Strip dev-launcher-specific local network permission keys from non-Debug builds
+# This only removes _expo._tcp Bonjour services and the dev-launcher usage description.
+# Other Bonjour services and custom descriptions are preserved for production use.
+
+if [ \"$CONFIGURATION\" != \"Debug\" ]; then
+  PLIST_PATH=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"
+  if [ -f \"$PLIST_PATH\" ]; then
+    # Check if NSBonjourServices exists
+    if /usr/libexec/PlistBuddy -c \"Print :NSBonjourServices\" \"$PLIST_PATH\" >/dev/null 2>&1; then
+      # Get the count of services
+      COUNT=$(/usr/libexec/PlistBuddy -c \"Print :NSBonjourServices\" \"$PLIST_PATH\" 2>/dev/null | grep \"^    \" | wc -l | tr -d ' ')
+
+      # Remove _expo._tcp
+      for ((i=COUNT-1; i>=0; i--)); do
+        SERVICE=$(/usr/libexec/PlistBuddy -c \"Print :NSBonjourServices:$i\" \"$PLIST_PATH\" 2>/dev/null || echo \"\")
+        if echo \"$SERVICE\" | grep -q \"_expo._tcp\"; then
+          /usr/libexec/PlistBuddy -c \"Delete :NSBonjourServices:$i\" \"$PLIST_PATH\" 2>/dev/null || true
+        fi
+      done
+
+      # If the array is now empty, remove it entirely
+      REMAINING=$(/usr/libexec/PlistBuddy -c \"Print :NSBonjourServices\" \"$PLIST_PATH\" 2>/dev/null | grep \"^    \" | wc -l | tr -d ' ')
+      if [ \"$REMAINING\" -eq \"0\" ]; then
+        /usr/libexec/PlistBuddy -c \"Delete :NSBonjourServices\" \"$PLIST_PATH\" 2>/dev/null || true
+      fi
+    fi
+
+    # Only delete the description if it matches the dev-launcher default text
+    DESC=$(/usr/libexec/PlistBuddy -c \"Print :NSLocalNetworkUsageDescription\" \"$PLIST_PATH\" 2>/dev/null || echo \"\")
+    if echo \"$DESC\" | grep -q \"Expo Dev Launcher\"; then
+      /usr/libexec/PlistBuddy -c \"Delete :NSLocalNetworkUsageDescription\" \"$PLIST_PATH\" 2>/dev/null || true
+    fi
+  fi
+fi
+";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -387,6 +446,8 @@
 				5C01B40FE0B449CAA563CC18 /* ClerkViewFactory.swift */,
 				C133B75A98DC4B85BF5DEA98 /* ClerkViewFactory.swift */,
 				A380311A7B294E548C03CB06 /* ClerkViewFactory.swift */,
+				754A1CD69AB740D6B9515546 /* ClerkViewFactory.swift */,
+				DA683678A973498CA54B8738 /* ClerkViewFactory.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -661,6 +722,22 @@
 				version = 1.0.0;
 			};
 		};
+		A1E41DB5C91F4A4989F0848E = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = https://github.com/clerk/clerk-ios.git;
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
+		83FFFB6BAA314A10900CB1A9 = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = https://github.com/clerk/clerk-ios.git;
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -732,6 +809,26 @@
 		092D7869450B401BB3C36F72 = {
 			isa = XCSwiftPackageProductDependency;
 			package = 34B73834CE8D440D8E161153;
+			productName = ClerkKitUI;
+		};
+		F1BFB7A12A854FAB9F66034F = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1E41DB5C91F4A4989F0848E;
+			productName = ClerkKit;
+		};
+		05357135F2F644719AA06200 = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1E41DB5C91F4A4989F0848E;
+			productName = ClerkKitUI;
+		};
+		5F0E50B2501C40A4A550AC17 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83FFFB6BAA314A10900CB1A9;
+			productName = ClerkKit;
+		};
+		AD03D8648B1C43F7B0E35AEB = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83FFFB6BAA314A10900CB1A9;
 			productName = ClerkKitUI;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -147,6 +147,7 @@ export function RecipeForm({
     fields: ingredientFields,
     append: appendIngredient,
     remove: removeIngredient,
+    update: updateIngredient,
   } = useFieldArray({ control, name: "ingredients" });
 
   const {
@@ -154,6 +155,7 @@ export function RecipeForm({
     append: appendInstruction,
     remove: removeInstruction,
     move: moveInstruction,
+    update: updateInstruction,
   } = useFieldArray({ control, name: "instructions" });
 
   const tag_ids = watch("tag_ids");
@@ -178,7 +180,26 @@ export function RecipeForm({
   async function pasteIngredients() {
     const text = await navigator.clipboard.readText().catch(() => "");
     const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-    lines.forEach((line) => {
+    if (lines.length === 0) return;
+    const [firstLine, ...rest] = lines;
+    const firstParsed = parseIngredientLine(firstLine);
+    const lastField = ingredientFields[ingredientFields.length - 1];
+    if (ingredientFields.length === 1 && !lastField?.name && !lastField?.quantity) {
+      updateIngredient(0, {
+        name: firstParsed.name,
+        quantity: firstParsed.quantity,
+        unit: firstParsed.unit,
+        is_section_header: false,
+      });
+    } else {
+      appendIngredient({
+        name: firstParsed.name,
+        quantity: firstParsed.quantity,
+        unit: firstParsed.unit,
+        is_section_header: false,
+      });
+    }
+    rest.forEach((line) => {
       const parsed = parseIngredientLine(line);
       appendIngredient({
         name: parsed.name,
@@ -195,7 +216,15 @@ export function RecipeForm({
       .split("\n")
       .map((l) => l.replace(/^(\d+[.)]\s*|[-*•–]\s*)/, "").trim())
       .filter(Boolean);
-    lines.forEach((content) => appendInstruction({ content }));
+    if (lines.length === 0) return;
+    const [firstLine, ...rest] = lines;
+    const lastField = instructionFields[instructionFields.length - 1];
+    if (instructionFields.length === 1 && !lastField?.content) {
+      updateInstruction(0, { content: firstLine });
+    } else {
+      appendInstruction({ content: firstLine });
+    }
+    rest.forEach((content) => appendInstruction({ content }));
   }
 
   return (

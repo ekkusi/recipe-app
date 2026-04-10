@@ -24,8 +24,11 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const { userId } = await auth();
+  console.log("DELETE COL", id, userId);
+
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await deleteCollection(id, userId);
+  console.log("DELETE COL success", id, userId);
   return NextResponse.json({ ok: true });
 }
